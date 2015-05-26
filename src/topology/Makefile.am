@@ -1,0 +1,10 @@
+EXTRA_LTLIBRARIES = libtopology.la
+
+libtopology_la_SOURCES = parser.c builder.c
+
+noinst_HEADERS = topology.h
+
+all: libtopology.la
+
+
+AM_CPPFLAGS=-I$(top_srcdir)/include
