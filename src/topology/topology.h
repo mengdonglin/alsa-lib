@@ -13,39 +13,15 @@
 
 */
 
-#if 0
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdarg.h>
-
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <dlfcn.h>
-#include <dirent.h>
-
-#endif
-
 #include <limits.h>
 #include <stdint.h>
 #include <linux/types.h>
 
 #include "local.h"
+#include "list.h"
 #include <sound/asound.h>
 #include <sound/asoc.h>
 #include <sound/tlv.h>
-
-//#include <alsa/asoundef.h>
-#include <alsa/version.h>
-#include <alsa/global.h>
-#include <alsa/input.h>
-#include <alsa/output.h>
-#include <alsa/error.h>
-#include <alsa/conf.h>
-/* TODO: no longer need list.h after integrating it into alsa lib */
-#include "list.h"
 
 /* kernel typedefs */
 typedef	uint32_t u32;

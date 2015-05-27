@@ -423,8 +423,7 @@ static struct soc_tplg_elem* create_elem_common(struct soc_tplg_priv *soc_tplg,
 }
 
 /* Get Private data from a file. */
-static int parse_data_file(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
-	struct soc_tplg_elem *elem)
+static int parse_data_file(snd_config_t *cfg, struct soc_tplg_elem *elem)
 {
 	struct snd_soc_tplg_private *priv = NULL;
 	const char *value = NULL;
@@ -483,7 +482,8 @@ static void dump_priv_data(struct soc_tplg_elem *elem)
 	unsigned char *p = (unsigned char *)priv->data;
 	unsigned int i, j = 0;
 
-	tplg_dbg(" elem size = %d, priv data size = %d\n", elem->size, priv->size);
+	tplg_dbg(" elem size = %d, priv data size = %d\n",
+		elem->size, priv->size);
 
 	for (i = 0; i < priv->size; i++) {
 		if (j++ % 8 == 0)
@@ -571,8 +571,8 @@ static int copy_data_hex(char *data, int off, const char *str, int width)
 	return 0;
 }
 
-static int parse_data_hex(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
-	struct soc_tplg_elem *elem, int width)
+static int parse_data_hex(snd_config_t *cfg, struct soc_tplg_elem *elem,
+	int width)
 {
 	struct snd_soc_tplg_private *priv;
 	const char *value = NULL;
@@ -645,7 +645,7 @@ static int parse_data(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
 		}
 
 		if (strcmp(id, "file") == 0) {
-			err = parse_data_file(soc_tplg, n, elem);
+			err = parse_data_file(n, elem);
 			if (err < 0) {
 				tplg_error("error: failed to parse data file");
 				return err;
@@ -654,7 +654,7 @@ static int parse_data(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
 		}
 
 		if (strcmp(id, "bytes") == 0) {
-			err = parse_data_hex(soc_tplg, n, elem, 1);
+			err = parse_data_hex(n, elem, 1);
 			if (err < 0) {
 				tplg_error("error: failed to parse data bytes");
 				return err;
@@ -663,7 +663,7 @@ static int parse_data(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
 		}
 
 		if (strcmp(id, "shorts") == 0) {
-			err = parse_data_hex(soc_tplg, n, elem, 2);
+			err = parse_data_hex(n, elem, 2);
 			if (err < 0) {
 				tplg_error("error: failed to parse data shorts");
 				return err;
@@ -672,7 +672,7 @@ static int parse_data(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
 		}
 
 		if (strcmp(id, "words") == 0) {
-			err = parse_data_hex(soc_tplg, n, elem, 4);
+			err = parse_data_hex(n, elem, 4);
 			if (err < 0) {
 				tplg_error("error: failed to parse data words");
 				return err;
@@ -686,8 +686,7 @@ static int parse_data(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
 
 #define TEXT_SIZE_MAX	(SND_SOC_TPLG_NUM_TEXTS * SNDRV_CTL_ELEM_ID_NAME_MAXLEN)
 
-static int parse_text_values(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
-	struct soc_tplg_elem *elem)
+static int parse_text_values(snd_config_t *cfg, struct soc_tplg_elem *elem)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
@@ -748,7 +747,7 @@ static int parse_text(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
 			continue;
 		
 		if (strcmp(id, "values") == 0) {
-			err = parse_text_values(soc_tplg, n, elem);
+			err = parse_text_values(n, elem);
 			if (err < 0) {
 				tplg_error("error: failed to parse text values");
 				return err;
@@ -767,8 +766,8 @@ static int parse_text(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
  *		shift "0" (shift)
  * }
  */
-static int parse_channel(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
-	void *private)
+static int parse_channel(struct soc_tplg_priv *soc_tplg ATTRIBUTE_UNUSED,
+	snd_config_t *cfg, void *private)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
@@ -808,8 +807,7 @@ static int parse_channel(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
 	return 0;
 }
 
-static int parse_dapm_mixers(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
-	struct soc_tplg_elem *elem)
+static int parse_dapm_mixers(snd_config_t *cfg, struct soc_tplg_elem *elem)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
@@ -831,8 +829,7 @@ static int parse_dapm_mixers(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
 	return 0;
 }
 
-static int parse_dapm_enums(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
-	struct soc_tplg_elem *elem)
+static int parse_dapm_enums(snd_config_t *cfg, struct soc_tplg_elem *elem)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
@@ -862,8 +859,8 @@ static int parse_dapm_enums(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
  *	put <string>
  * }
  */
-static int parse_ops(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
-	void *private)
+static int parse_ops(struct soc_tplg_priv *soc_tplg ATTRIBUTE_UNUSED,
+	snd_config_t *cfg, void *private)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
@@ -909,8 +906,7 @@ static int parse_ops(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
  * 		mute <int>
  * ]
  */
-static int parse_tlv_dbscale(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
-	struct soc_tplg_elem *elem)
+static int parse_tlv_dbscale(snd_config_t *cfg, struct soc_tplg_elem *elem)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
@@ -993,7 +989,7 @@ static int parse_tlv(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
 			continue;
 
 		if (strcmp(id, "scale") == 0) {
-			err = parse_tlv_dbscale(soc_tplg, n, elem);
+			err = parse_tlv_dbscale(n, elem);
 			if (err < 0) {
 				tplg_error("error: failed to DBScale");
 				return err;
@@ -1442,7 +1438,7 @@ static int parse_dapm_widget(struct soc_tplg_priv *soc_tplg,
 		}
 
 		if (strcmp(id, "enum") == 0) {
-			err = parse_dapm_enums(soc_tplg, n, elem);
+			err = parse_dapm_enums(n, elem);
 			if (err < 0)
 				return err;
 
@@ -1450,7 +1446,7 @@ static int parse_dapm_widget(struct soc_tplg_priv *soc_tplg,
 		}
 
 		if (strcmp(id, "mixer") == 0) {
-			err = parse_dapm_mixers(soc_tplg, n, elem);
+			err = parse_dapm_mixers(n, elem);
 			if (err < 0)
 				return err;
 
@@ -1472,7 +1468,7 @@ static int parse_dapm_widget(struct soc_tplg_priv *soc_tplg,
 
 static __le64 lookup_pcm_format(const char *c)
 {
-	int i;
+	unsigned int i;
 
 	for (i = 0; i < ARRAY_SIZE(pcm_format_map); i++) {
 		if (strcmp(pcm_format_map[i].name, c) == 0)
@@ -1482,8 +1478,8 @@ static __le64 lookup_pcm_format(const char *c)
 	return -EINVAL;
 }
 
-static int parse_stream_cfg(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
-	void *private)
+static int parse_stream_cfg(struct soc_tplg_priv *soc_tplg ATTRIBUTE_UNUSED,
+	snd_config_t *cfg, void *private)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
@@ -1699,8 +1695,8 @@ static int parse_pcm_caps(struct soc_tplg_priv *soc_tplg,
 	return 0;	
 }
 
-static int parse_pcm_cfg(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
-	void *private)
+static int parse_pcm_cfg(struct soc_tplg_priv *soc_tplg ATTRIBUTE_UNUSED,
+	snd_config_t *cfg, void *private)
 {
 	struct snd_soc_tplg_pcm_cfg_caps *capconf = private;
 	struct snd_soc_tplg_stream_config *configs = capconf->configs;
@@ -2059,7 +2055,7 @@ static int parse_line(const char *text,
 	struct snd_soc_tplg_dapm_graph_elem *line)
 {
 	char buf[1024];
-	int len, i;
+	unsigned int len, i;
 	const char *source = NULL, *sink = NULL, *control = NULL;
 
 	strncpy(buf, text, 1024);
@@ -2778,7 +2774,7 @@ static int check_pcm_cfg_caps(struct soc_tplg_priv *soc_tplg,
 	struct soc_tplg_elem *ref_elem = NULL;
 	struct snd_soc_tplg_pcm_cfg_caps *capconf;
 	struct snd_soc_tplg_pcm_dai *pcm_dai;
-	int i, j;
+	unsigned int i, j;
 
 	switch (elem->type) {
 	case PARSER_TYPE_PCM:
@@ -2818,7 +2814,8 @@ static int check_pcm_cfg_caps(struct soc_tplg_priv *soc_tplg,
 	return 0;
 }
 
-static int check_pcm_dai(struct soc_tplg_priv *soc_tplg, int type)
+static int check_pcm_dai(struct soc_tplg_priv *soc_tplg,
+	unsigned int type)
 {
 	struct list_head *base, *pos, *npos;
 	struct soc_tplg_elem *elem;
@@ -2887,7 +2884,7 @@ static int tplg_check_integ(struct soc_tplg_priv *soc_tplg)
 
 int parse_conf(struct soc_tplg_priv *soc_tplg, const char *filename)
 {
-	snd_config_t *cfg;
+	snd_config_t *cfg = NULL;
 	int err = 0;
 
 	fprintf(stdout, "Loading config....\n");
