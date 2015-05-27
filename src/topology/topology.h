@@ -25,9 +25,10 @@
 #include <sys/stat.h>
 #include <dlfcn.h>
 #include <dirent.h>
-#include <limits.h>
+
 #endif
 
+#include <limits.h>
 #include <stdint.h>
 #include <linux/types.h>
 
