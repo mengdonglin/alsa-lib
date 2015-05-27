@@ -293,7 +293,7 @@ static struct soc_tplg_elem *lookup_pcm_dai_stream(struct list_head *base, const
 
 static int lookup_widget(const char *w)
 {
-	int i;
+	unsigned int i;
 
 	for (i = 0; i < ARRAY_SIZE(widget_map); i++) {
 		if (strcmp(widget_map[i].name, w) == 0)
@@ -305,7 +305,7 @@ static int lookup_widget(const char *w)
 
 static int lookup_channel(const char *c)
 {
-	int i;
+	unsigned int i;
 
 	for (i = 0; i < ARRAY_SIZE(channel_map); i++) {
 		if (strcmp(channel_map[i].name, c) == 0)
@@ -317,7 +317,7 @@ static int lookup_channel(const char *c)
 
 static int lookup_ops(const char *c)
 {
-	int i;
+	unsigned int i;
 
 	for (i = 0; i < ARRAY_SIZE(control_map); i++) {
 		if (strcmp(control_map[i].name, c) == 0)
@@ -429,7 +429,7 @@ static int parse_data_file(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
 	struct snd_soc_tplg_private *priv = NULL;
 	const char *value = NULL;
 	FILE *fp;
-	int size;
+	size_t size;
 	size_t bytes_read;
 	int err = 0;
 
@@ -481,7 +481,7 @@ static void dump_priv_data(struct soc_tplg_elem *elem)
 {
 	struct snd_soc_tplg_private *priv = elem->data;
 	unsigned char *p = (unsigned char *)priv->data;
-	int i, j = 0;
+	unsigned int i, j = 0;
 
 	tplg_dbg(" elem size = %d, priv data size = %d\n", elem->size, priv->size);
 
@@ -625,7 +625,7 @@ static int parse_data_hex(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
  *	}
  */
 static int parse_data(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
-	void *private)
+	void *private ATTRIBUTE_UNUSED)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
@@ -729,7 +729,7 @@ static int parse_text_values(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
  *	}
  */
 static int parse_text(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
-	void *private)
+	void *private ATTRIBUTE_UNUSED)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
@@ -974,7 +974,7 @@ static int parse_tlv_dbscale(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
  *	}
  */
 static int parse_tlv(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
-	void *private)
+	void *private ATTRIBUTE_UNUSED)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
@@ -1021,7 +1021,7 @@ static int parse_tlv(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
  * }
  */
 static int parse_control_bytes(struct soc_tplg_priv *soc_tplg,
-	snd_config_t *cfg, void *private)
+	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_bytes_control *be;
 	struct soc_tplg_elem *elem;
@@ -1132,7 +1132,7 @@ static int parse_control_bytes(struct soc_tplg_priv *soc_tplg,
  * }
  */
 static int parse_control_enum(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
-	void *private)
+	void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_enum_control *ec;
 	struct soc_tplg_elem *elem;
@@ -1237,7 +1237,7 @@ static int parse_control_enum(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
  * }
  */
 static int parse_control_mixer(struct soc_tplg_priv *soc_tplg,
-	snd_config_t *cfg, void *private)
+	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_mixer_control *mc;
 	struct soc_tplg_elem *elem;
@@ -1357,7 +1357,7 @@ static int parse_control_mixer(struct soc_tplg_priv *soc_tplg,
  * }
  */
 static int parse_dapm_widget(struct soc_tplg_priv *soc_tplg,
-	snd_config_t *cfg, void *private)
+	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_dapm_widget *widget;
 	struct soc_tplg_elem *elem;
@@ -1560,7 +1560,7 @@ static int parse_stream_cfg(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
  * }
  */
 static int parse_pcm_config(struct soc_tplg_priv *soc_tplg,
-	snd_config_t *cfg, void *private)
+	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_stream_config *sc;
 	struct soc_tplg_elem *elem;
@@ -1635,7 +1635,7 @@ static int split_format(struct snd_soc_tplg_stream_caps *caps, char *str)
  * } 
  */
 static int parse_pcm_caps(struct soc_tplg_priv *soc_tplg,
-	snd_config_t *cfg, void *private)
+	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_stream_caps *sc;
 	struct soc_tplg_elem *elem;
@@ -1821,7 +1821,7 @@ static int parse_pcm_cap_cfg(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
  * }
  */
 static int parse_pcm(struct soc_tplg_priv *soc_tplg,
-	snd_config_t *cfg, void *private)
+	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_pcm_dai *pcm_dai;
 	struct soc_tplg_elem *elem;
@@ -1905,7 +1905,7 @@ static int parse_pcm(struct soc_tplg_priv *soc_tplg,
  * }
  */
 static int parse_be(struct soc_tplg_priv *soc_tplg,
-	snd_config_t *cfg, void *private)
+	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_pcm_dai *pcm_dai;
 	struct soc_tplg_elem *elem;
@@ -1995,7 +1995,7 @@ static int parse_be(struct soc_tplg_priv *soc_tplg,
  * }
  */
 static int parse_cc(struct soc_tplg_priv *soc_tplg,
-	snd_config_t *cfg, void *private)
+	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_pcm_dai *pcm_dai;
 	struct soc_tplg_elem *elem;
@@ -2144,7 +2144,7 @@ static int parse_routes(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg)
 }
 
 static int parse_dapm_graph(struct soc_tplg_priv *soc_tplg, snd_config_t *cfg,
-	void *private)
+	void *private ATTRIBUTE_UNUSED)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
