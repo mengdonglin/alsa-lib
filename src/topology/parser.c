@@ -190,7 +190,7 @@ static void free_elem_list(struct list_head *base)
 	}
 }
 
-struct soc_tplg_priv *socfw_new(const char *name, int verbose)
+struct soc_tplg_priv *snd_socfw_new(const char *name, int verbose)
 {
 	struct soc_tplg_priv * soc_tplg;
 	int fd;
@@ -229,7 +229,7 @@ struct soc_tplg_priv *socfw_new(const char *name, int verbose)
 	return soc_tplg;
 }
 
-void socfw_free(struct soc_tplg_priv *soc_tplg)
+void snd_socfw_free(struct soc_tplg_priv *soc_tplg)
 {
 	close(soc_tplg->out_fd);
 
@@ -2882,7 +2882,7 @@ static int tplg_check_integ(struct soc_tplg_priv *soc_tplg)
 	return err;
 }
 
-int parse_conf(struct soc_tplg_priv *soc_tplg, const char *filename)
+int snd_parse_conf(struct soc_tplg_priv *soc_tplg, const char *filename)
 {
 	snd_config_t *cfg = NULL;
 	int err = 0;

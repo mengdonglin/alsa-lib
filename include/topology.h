@@ -31,7 +31,9 @@ extern "C" {
 
 struct soc_tplg_priv;
 
-int parse_conf(struct soc_tplg_priv *soc_tplg, const char *filename);
+int snd_parse_conf(struct soc_tplg_priv *soc_tplg, const char *filename);
+struct soc_tplg_priv *snd_socfw_new(const char *name, int verbose);
+void snd_socfw_free(struct soc_tplg_priv *soc_tplg);
 
 #ifdef __cplusplus
 }
