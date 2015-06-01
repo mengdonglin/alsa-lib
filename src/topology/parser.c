@@ -303,13 +303,15 @@ static int lookup_widget(const char *w)
 	return -EINVAL;
 }
 
-static int lookup_channel(const char *c)
+static int lookup_channel(const char *c, __le32 *id)
 {
 	unsigned int i;
 
 	for (i = 0; i < ARRAY_SIZE(channel_map); i++) {
-		if (strcmp(channel_map[i].name, c) == 0)
-			return channel_map[i].id;
+		if (strcmp(channel_map[i].name, c) == 0) {
+			*id = channel_map[i].id; 
+			return 0;
+		}
 	}
 
 	return -EINVAL;
@@ -773,12 +775,13 @@ static int parse_channel(struct soc_tplg_priv *soc_tplg ATTRIBUTE_UNUSED,
 	snd_config_t *n;
 	struct snd_soc_tplg_channel *channel = private;
 	const char *id, *value;
+	int ret;
 
 	snd_config_get_id(cfg, &id);
-	channel->id = lookup_channel(id);
-	if (channel->id < 0) {
+	ret = lookup_channel(id, &channel->id);
+	if (ret < 0) {
 		tplg_error("invalid channel %s\n", id);
-		return -EINVAL;
+		return ret;
 	}
 
 	channel->size = sizeof(*channel);
@@ -1466,13 +1469,15 @@ static int parse_dapm_widget(struct soc_tplg_priv *soc_tplg,
 	return 0;
 }
 
-static __le64 lookup_pcm_format(const char *c)
+static int lookup_pcm_format(const char *c, __le64 *format)
 {
 	unsigned int i;
 
 	for (i = 0; i < ARRAY_SIZE(pcm_format_map); i++) {
-		if (strcmp(pcm_format_map[i].name, c) == 0)
-			return pcm_format_map[i].id;
+		if (strcmp(pcm_format_map[i].name, c) == 0) {
+			*format = pcm_format_map[i].id;
+			return 0;
+		}
 	}
 
 	return -EINVAL;
@@ -1487,6 +1492,7 @@ static int parse_stream_cfg(struct soc_tplg_priv *soc_tplg ATTRIBUTE_UNUSED,
 	struct snd_soc_tplg_stream *stream;
 	const char *id, *val;
 	__le64 format;
+	int ret;
 
 	snd_config_get_id(cfg, &id);
 
@@ -1512,8 +1518,8 @@ static int parse_stream_cfg(struct soc_tplg_priv *soc_tplg ATTRIBUTE_UNUSED,
 			return -EINVAL;
 
 		if (strcmp(id, "format") == 0) {
-			format = lookup_pcm_format(val);
-			if (format < 0) {
+			ret = lookup_pcm_format(val, &format);
+			if (ret < 0) {
 				tplg_error("Unsupported stream format %s\n",
 					val);
 				return -EINVAL;
@@ -1601,12 +1607,12 @@ static int split_format(struct snd_soc_tplg_stream_caps *caps, char *str)
 {
 	char *s = NULL;
 	__le64 format;
-	int i = 0;
+	int i = 0, ret;
 
 	s = strtok(str, ",");
 	while ((s != NULL) && (i < SND_SOC_TPLG_MAX_FORMATS)) {
-		format = lookup_pcm_format(s);
-		if (format < 0) {
+		ret = lookup_pcm_format(s, &format);
+		if (ret < 0) {
 			tplg_error("Unsupported stream format %s\n", s);
 			return -EINVAL;
 		}

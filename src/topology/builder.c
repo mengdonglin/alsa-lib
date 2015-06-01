@@ -51,11 +51,11 @@ static int write_block_header(struct soc_tplg_priv *soc_tplg, u32 type,
 	hdr.count = count;
 
 	/* make sure file offset is aligned with the calculated HDR offset */
-	if (offset != soc_tplg->next_hdr_pos) {
+	if ((unsigned int)offset != soc_tplg->next_hdr_pos) {
 		tplg_error("error: New header is at offset 0x%x but file"
 			" offset 0x%x is %s by %d bytes\n",
 			soc_tplg->next_hdr_pos, offset,
-			offset > soc_tplg->next_hdr_pos ? "ahead" : "behind",
+			(unsigned int)offset > soc_tplg->next_hdr_pos ? "ahead" : "behind",
 			abs(offset - soc_tplg->next_hdr_pos));
 		exit(-EINVAL);
 	}
@@ -128,8 +128,7 @@ static int write_elem_block(struct soc_tplg_priv *soc_tplg,
 	return 0;
 }
 
-static int calc_block_size(struct soc_tplg_priv *soc_tplg,
-	struct list_head *base)
+static int calc_block_size(struct list_head *base)
 {
 	struct list_head *pos, *npos;
 	struct soc_tplg_elem *elem;
@@ -150,7 +149,7 @@ static int write_block(struct soc_tplg_priv *soc_tplg, struct list_head *base,
 	int size;
 
 	/* calculate the block size in bytes for all elems in this list */
-	size = calc_block_size(soc_tplg, base);
+	size = calc_block_size(base);
 	if (size <= 0)
 		return size;
 
@@ -276,7 +275,7 @@ int socfw_write_data(struct soc_tplg_priv *soc_tplg)
 int socfw_import_vendor(struct soc_tplg_priv *soc_tplg, const char *name,
 	int type)
 {
-	size_t bytes, size;
+	int bytes, size;
 	char buf[CHUNK_SIZE];
 	int i, chunks, rem, err;
 
