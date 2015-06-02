@@ -308,7 +308,7 @@ static int lookup_channel(const char *c, __le32 *id)
 	unsigned int i;
 
 	for (i = 0; i < ARRAY_SIZE(channel_map); i++) {
-		if (strcmp(channel_map[i].name, c) == 0) {
+		if (strcasecmp(channel_map[i].name, c) == 0) {
 			*id = channel_map[i].id; 
 			return 0;
 		}
