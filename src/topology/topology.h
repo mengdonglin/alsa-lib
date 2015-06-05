@@ -19,6 +19,7 @@
 
 #include "local.h"
 #include "list.h"
+
 #include <sound/asound.h>
 #include <sound/asoc.h>
 #include <sound/tlv.h>
@@ -30,7 +31,6 @@ typedef	uint16_t u16;
 typedef	int16_t s16;
 typedef	uint8_t u8;
 typedef	int8_t s8;
-
 
 struct soc_tplg_ref;
 struct soc_tplg_elem;
@@ -56,7 +56,7 @@ enum parser_type {
 #define TLV_DB_SCALE_SIZE (sizeof(u32) * 3)
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
-struct soc_tplg_priv {
+struct tplg {
 
 	/* opaque vendor data */
 	int vendor_fd;
@@ -98,11 +98,12 @@ struct soc_tplg_ref {
 	struct list_head list;
 };
 
+/* topology element */
 struct soc_tplg_elem {
 
 	char id[SNDRV_CTL_ELEM_ID_NAME_MAXLEN];
 
-	/* storage for textsand data if this is text or data elem*/
+	/* storage for texts and data if this is text or data elem*/
 	char texts[SND_SOC_TPLG_NUM_TEXTS][SNDRV_CTL_ELEM_ID_NAME_MAXLEN];
 	
 	int index;
@@ -138,12 +139,11 @@ struct soc_tplg_elem {
 	struct list_head list; /* list of all elements with same type */
 };
 
-int socfw_write_data(struct soc_tplg_priv *soc_tplg);
-void tplg_error(const char *fmt, ...);
+int tplg_write_data(struct tplg *soc_tplg);
 
 #define SOC_TPLG_DEBUG
 #ifdef SOC_TPLG_DEBUG
-#define tplg_dbg tplg_error
+#define tplg_dbg(fmt, arg...) fprintf(stdout, fmt, ##arg)
 #else
 #define tplg_dbg(fmt, arg...) do { } while (0)
 #endif

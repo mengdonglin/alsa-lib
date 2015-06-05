@@ -13,12 +13,10 @@
 
 */
 
-/* TODO: no longer need list.h after integrating it into alsa lib */
 #include "list.h"
-
 #include "topology.h"
 
-static void verbose(struct soc_tplg_priv *soc_tplg, const char *fmt, ...)
+static void verbose(struct tplg *soc_tplg, const char *fmt, ...)
 {
 	int offset = lseek(soc_tplg->out_fd, 0, SEEK_CUR);
 	va_list va;
@@ -32,7 +30,7 @@ static void verbose(struct soc_tplg_priv *soc_tplg, const char *fmt, ...)
 }
 
 /* write out block header to output file */
-static int write_block_header(struct soc_tplg_priv *soc_tplg, u32 type,
+static int write_block_header(struct tplg *soc_tplg, u32 type,
 	u32 vendor_type, u32 version, u32 index, size_t payload_size, int count)
 {
 	struct snd_soc_tplg_hdr hdr;
@@ -52,7 +50,7 @@ static int write_block_header(struct soc_tplg_priv *soc_tplg, u32 type,
 
 	/* make sure file offset is aligned with the calculated HDR offset */
 	if ((unsigned int)offset != soc_tplg->next_hdr_pos) {
-		tplg_error("error: New header is at offset 0x%x but file"
+		fprintf(stderr, "error: New header is at offset 0x%x but file"
 			" offset 0x%x is %s by %d bytes\n",
 			soc_tplg->next_hdr_pos, offset,
 			(unsigned int)offset > soc_tplg->next_hdr_pos ? "ahead" : "behind",
@@ -76,7 +74,7 @@ static int write_block_header(struct soc_tplg_priv *soc_tplg, u32 type,
 	return bytes;
 }
 
-static int write_elem_block(struct soc_tplg_priv *soc_tplg,
+static int write_elem_block(struct tplg *soc_tplg,
 	struct list_head *base, int size, int tplg_type, const char *obj_name)
 {
 	struct list_head *pos, *npos;
@@ -91,7 +89,7 @@ static int write_elem_block(struct soc_tplg_priv *soc_tplg,
 	ret = write_block_header(soc_tplg, tplg_type, 0,
 		SND_SOC_TPLG_ABI_VERSION, 0, size, count);
 	if (ret < 0) {
-		tplg_error("error: failed to write %s block %d\n",
+		fprintf(stderr, "error: failed to write %s block %d\n",
 			obj_name, ret);
 		return ret;
 	}
@@ -110,7 +108,7 @@ static int write_elem_block(struct soc_tplg_priv *soc_tplg,
 
 		count = write(soc_tplg->out_fd, elem->obj, elem->size);
 		if (count < 0) {		
-			tplg_error("error: failed to write %s %d\n",
+			fprintf(stderr, "error: failed to write %s %d\n",
 				obj_name, ret);
 			return ret;		
 		}
@@ -120,7 +118,7 @@ static int write_elem_block(struct soc_tplg_priv *soc_tplg,
 
 	/* make sure we have written the correct size */
 	if (wsize != size) {
-		tplg_error("error: size mismatch. Expected %d wrote %d\n",
+		fprintf(stderr, "error: size mismatch. Expected %d wrote %d\n",
 			size, wsize);
 		return -EIO;
 	}
@@ -143,7 +141,7 @@ static int calc_block_size(struct list_head *base)
 	return size;
 }
 
-static int write_block(struct soc_tplg_priv *soc_tplg, struct list_head *base,
+static int write_block(struct tplg *soc_tplg, struct list_head *base,
 	int type)
 {
 	int size;
@@ -156,7 +154,6 @@ static int write_block(struct soc_tplg_priv *soc_tplg, struct list_head *base,
 	verbose(soc_tplg, " block size for type %d is %d\n", type, size);
 
 	/* write each elem for this block */
-	/* TODO: add all objects */
 	switch (type) {
 	case PARSER_TYPE_MIXER:
 		return write_elem_block(soc_tplg, base, size,
@@ -197,7 +194,7 @@ static int write_block(struct soc_tplg_priv *soc_tplg, struct list_head *base,
 	return 0;
 }
 
-int socfw_write_data(struct soc_tplg_priv *soc_tplg)
+int tplg_write_data(struct tplg *soc_tplg)
 {
 	int ret;
 
@@ -205,7 +202,7 @@ int socfw_write_data(struct soc_tplg_priv *soc_tplg)
 	ret = write_block(soc_tplg, &soc_tplg->mixer_list,
 		PARSER_TYPE_MIXER);
 	if (ret < 0) {
-		tplg_error("failed to write control elems %d\n", ret);
+		fprintf(stderr, "failed to write control elems %d\n", ret);
 		return ret;
 	}
 
@@ -213,7 +210,7 @@ int socfw_write_data(struct soc_tplg_priv *soc_tplg)
 	ret = write_block(soc_tplg, &soc_tplg->enum_list,
 		PARSER_TYPE_ENUM);
 	if (ret < 0) {
-		tplg_error("failed to write control elems %d\n", ret);
+		fprintf(stderr, "failed to write control elems %d\n", ret);
 		return ret;
 	}
 
@@ -221,7 +218,7 @@ int socfw_write_data(struct soc_tplg_priv *soc_tplg)
 	ret = write_block(soc_tplg, &soc_tplg->bytes_ext_list,
 		PARSER_TYPE_BYTES);
 	if (ret < 0) {
-		tplg_error("failed to write control elems %d\n", ret);
+		fprintf(stderr, "failed to write control elems %d\n", ret);
 		return ret;
 	}
 	
@@ -229,7 +226,7 @@ int socfw_write_data(struct soc_tplg_priv *soc_tplg)
 	ret = write_block(soc_tplg, &soc_tplg->widget_list,
 		PARSER_TYPE_DAPM_WIDGET);
 	if (ret < 0) {
-		tplg_error("failed to write widget elems %d\n", ret);
+		fprintf(stderr, "failed to write widget elems %d\n", ret);
 		return ret;
 	}
 
@@ -237,7 +234,7 @@ int socfw_write_data(struct soc_tplg_priv *soc_tplg)
 	ret = write_block(soc_tplg, &soc_tplg->pcm_list,
 		PARSER_TYPE_PCM);
 	if (ret < 0) {
-		tplg_error("failed to write pcm elems %d\n", ret);
+		fprintf(stderr, "failed to write pcm elems %d\n", ret);
 		return ret;
 	}
 
@@ -245,7 +242,7 @@ int socfw_write_data(struct soc_tplg_priv *soc_tplg)
 	ret = write_block(soc_tplg, &soc_tplg->be_list,
 		PARSER_TYPE_BE);
 	if (ret < 0) {
-		tplg_error("failed to write be elems %d\n", ret);
+		fprintf(stderr, "failed to write be elems %d\n", ret);
 		return ret;
 	}
 
@@ -253,7 +250,7 @@ int socfw_write_data(struct soc_tplg_priv *soc_tplg)
 	ret = write_block(soc_tplg, &soc_tplg->cc_list,
 		PARSER_TYPE_CC);
 	if (ret < 0) {
-		tplg_error("failed to write cc elems %d\n", ret);
+		fprintf(stderr, "failed to write cc elems %d\n", ret);
 		return ret;
 	}
 
@@ -261,74 +258,8 @@ int socfw_write_data(struct soc_tplg_priv *soc_tplg)
 	ret = write_block(soc_tplg, &soc_tplg->route_list,
 		PARSER_TYPE_DAPM_GRAPH);
 	if (ret < 0) {
-		tplg_error("failed to write graph elems %d\n", ret);
+		fprintf(stderr, "failed to write graph elems %d\n", ret);
 		return ret;
-	}
-
-	/* TODO: add other items */
-
-	/* The handle of output file is closed in socfw_free */
-
-	return 0;
-}
-
-int socfw_import_vendor(struct soc_tplg_priv *soc_tplg, const char *name,
-	int type)
-{
-	int bytes, size;
-	char buf[CHUNK_SIZE];
-	int i, chunks, rem, err;
-
-	soc_tplg->vendor_fd = open(name, O_RDONLY);
-	if (soc_tplg->vendor_fd < 0) {
-		fprintf(stderr, "error: can't open %s %d\n",
-			name, soc_tplg->vendor_fd);
-		return soc_tplg->vendor_fd;
-	}
-
-
-	size = lseek(soc_tplg->vendor_fd, 0, SEEK_END);
-	if (size <= 0)
-		return size;
-
-	verbose(soc_tplg, " vendor: file size is %d bytes\n", size);
-
-	err = write_block_header(soc_tplg, type, 0, 0, 0, size, 1);
-	if (err < 0)
-		return err;
-
-	lseek(soc_tplg->vendor_fd, 0, SEEK_SET);
-
-	chunks = size / CHUNK_SIZE;
-	rem = size % CHUNK_SIZE;
-
-	for (i = 0; i < chunks; i++) {
-		bytes = read(soc_tplg->vendor_fd, buf, CHUNK_SIZE);
-		if (bytes < 0 || bytes != CHUNK_SIZE) {
-			fprintf(stderr, "error: can't read vendor data %lu\n",
-				(long unsigned int)bytes);
-			return bytes;
-		}
-
-		bytes = write(soc_tplg->out_fd, buf, CHUNK_SIZE);
-		if (bytes < 0 || bytes != CHUNK_SIZE) {
-			fprintf(stderr, "error: can't write vendor data %lu\n",
-				(long unsigned int)bytes);
-			return bytes;
-		}
-	}
-
-	bytes = read(soc_tplg->vendor_fd, buf, rem);
-	if (bytes < 0 || bytes != rem) {
-		fprintf(stderr, "error: can't read vendor data %lu\n",
-			(long unsigned int)bytes);
-		return bytes;
-	}
-
-	bytes = write(soc_tplg->out_fd, buf, rem);
-	if (bytes < 0 || bytes != rem) {
-		fprintf(stderr, "error: can't write vendor data %lu\n", (long unsigned int)bytes);
-		return bytes;
 	}
 
 	return 0;
