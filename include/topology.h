@@ -25,15 +25,26 @@
 extern "C" {
 #endif
 
-/* public API header */
+/**
+ *  \defgroup Topology Interface
+ *  The topology interface.
+ *  See \ref Topology page for more details.
+ *  \{
+ */
 
-/* needs clean up with private header */
+/*! \page Topology ALSA Topology Interface
+ * 
+ * ALSA Use Case Interface
+ *
+ */
 
-struct soc_tplg_priv;
+typedef struct snd_tplg snd_tplg_t;
 
-int snd_parse_conf(struct soc_tplg_priv *soc_tplg, const char *filename);
-struct soc_tplg_priv *snd_socfw_new(const char *name, int verbose);
-void snd_socfw_free(struct soc_tplg_priv *soc_tplg);
+snd_tplg_t *snd_socfw_new(const char *name, int verbose);
+void snd_socfw_free(snd_tplg_t *tplg);
+
+int snd_parse_conf(snd_tplg_t *tplg, const char *filename);
+
 
 #ifdef __cplusplus
 }

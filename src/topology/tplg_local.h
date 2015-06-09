@@ -1,17 +1,14 @@
 /*
-  Copyright(c) 2014-2015 Intel Corporation
-  All rights reserved.
-
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of version 2 of the GNU General Public License as
-  published by the Free Software Foundation.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-*/
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ */
 
 #include <limits.h>
 #include <stdint.h>
@@ -19,23 +16,16 @@
 
 #include "local.h"
 #include "list.h"
+#include "topology.h"
 
 #include <sound/asound.h>
 #include <sound/asoc.h>
 #include <sound/tlv.h>
 
-/* kernel typedefs */
-typedef	uint32_t u32;
-typedef	int32_t s32;
-typedef	uint16_t u16;
-typedef	int16_t s16;
-typedef	uint8_t u8;
-typedef	int8_t s8;
+struct tplg_ref;
+struct tplg_elem;
 
-struct soc_tplg_ref;
-struct soc_tplg_elem;
-
-/* internal topology type not used by kernel */
+/* internal topology object type not used by kernel */
 enum parser_type {
 	PARSER_TYPE_TLV = 0,
 	PARSER_TYPE_MIXER,
@@ -56,7 +46,7 @@ enum parser_type {
 #define TLV_DB_SCALE_SIZE (sizeof(u32) * 3)
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
-struct tplg {
+struct snd_tplg {
 
 	/* opaque vendor data */
 	int vendor_fd;
@@ -66,10 +56,10 @@ struct tplg {
 	int out_fd;
 
 	int verbose;
-	u32 version;
+	unsigned int version;
 
 	/* runtime state */
-	u32 next_hdr_pos;
+	unsigned int next_hdr_pos;
 	int index;
 
 	/* list of each element type */
@@ -91,15 +81,15 @@ struct tplg {
 };
 
 /* object text references */
-struct soc_tplg_ref {
-	u32 type;
-	struct soc_tplg_elem *elem;
+struct tplg_ref {
+	unsigned int type;
+	struct tplg_elem *elem;
 	char id[SNDRV_CTL_ELEM_ID_NAME_MAXLEN];
 	struct list_head list;
 };
 
 /* topology element */
-struct soc_tplg_elem {
+struct tplg_elem {
 
 	char id[SNDRV_CTL_ELEM_ID_NAME_MAXLEN];
 
@@ -139,11 +129,11 @@ struct soc_tplg_elem {
 	struct list_head list; /* list of all elements with same type */
 };
 
-int tplg_write_data(struct tplg *soc_tplg);
+int tplg_write_data(snd_tplg_t *tplg);
 
-#define SOC_TPLG_DEBUG
-#ifdef SOC_TPLG_DEBUG
-#define tplg_dbg(fmt, arg...) fprintf(stdout, fmt, ##arg)
+#define TPLG_DEBUG
+#ifdef TPLG_DEBUG
+#define tplg_dbg SNDERR
 #else
 #define tplg_dbg(fmt, arg...) do { } while (0)
 #endif
