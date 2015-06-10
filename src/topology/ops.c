@@ -49,7 +49,7 @@ static int lookup_ops(const char *c)
  *	put <string>
  * }
  */
-int parse_ops(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
+int tplg_parse_ops(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 	snd_config_t *cfg, void *private)
 {
 	snd_config_iterator_t i, next;

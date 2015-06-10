@@ -30,7 +30,7 @@ static int copy_tlv(struct tplg_elem *elem, struct tplg_elem *ref)
 }
 
 /* check referenced TLV for a mixer control */
-static int check_mixer_control(snd_tplg_t *tplg,
+static int tplg_check_mixer_control(snd_tplg_t *tplg,
 				struct tplg_elem *elem)
 {
 	struct tplg_ref *ref;
@@ -79,7 +79,7 @@ static void copy_enum_texts(struct tplg_elem *enum_elem,
 }
 
 /* check referenced text for a enum control */
-static int check_enum_control(snd_tplg_t *tplg,
+static int tplg_check_enum_control(snd_tplg_t *tplg,
 				struct tplg_elem *elem)
 {
 	struct tplg_ref *ref;
@@ -117,7 +117,7 @@ static int check_enum_control(snd_tplg_t *tplg,
 }
 
 /* check referenced private data for a byte control */
-static int check_bytes_control(snd_tplg_t *tplg,
+static int tplg_check_bytes_control(snd_tplg_t *tplg,
 				struct tplg_elem *elem)
 {
 	struct tplg_ref *ref;
@@ -144,7 +144,7 @@ static int check_bytes_control(snd_tplg_t *tplg,
 	return 0;
 }
 
-int check_controls(snd_tplg_t *tplg)
+int tplg_check_controls(snd_tplg_t *tplg)
 {
 	struct list_head *base, *pos, *npos;
 	struct tplg_elem *elem;
@@ -153,7 +153,7 @@ int check_controls(snd_tplg_t *tplg)
 	base = &tplg->mixer_list;
 	list_for_each_safe(pos, npos, base) {
 		elem = list_entry(pos, struct tplg_elem, list);
-		err = check_mixer_control(tplg, elem);
+		err = tplg_check_mixer_control(tplg, elem);
 		if (err < 0)
 			return err;
 	}
@@ -161,7 +161,7 @@ int check_controls(snd_tplg_t *tplg)
 	base = &tplg->enum_list;
 	list_for_each_safe(pos, npos, base) {
 		elem = list_entry(pos, struct tplg_elem, list);
-		err = check_enum_control(tplg, elem);
+		err = tplg_check_enum_control(tplg, elem);
 		if (err < 0)
 			return err;
 	}
@@ -169,7 +169,7 @@ int check_controls(snd_tplg_t *tplg)
 	base = &tplg->bytes_ext_list;
 	list_for_each_safe(pos, npos, base) {
 		elem = list_entry(pos, struct tplg_elem, list);
-		err = check_bytes_control(tplg, elem);
+		err = tplg_check_bytes_control(tplg, elem);
 		if (err < 0)
 			return err;
 	}
@@ -189,7 +189,7 @@ int check_controls(snd_tplg_t *tplg)
  * 		mute <int>
  * ]
  */
-static int parse_tlv_dbscale(snd_config_t *cfg, struct tplg_elem *elem)
+static int tplg_parse_tlv_dbscale(snd_config_t *cfg, struct tplg_elem *elem)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
@@ -252,7 +252,7 @@ static int parse_tlv_dbscale(snd_config_t *cfg, struct tplg_elem *elem)
  * 		]
  *	}
  */
-int parse_tlv(snd_tplg_t *tplg, snd_config_t *cfg,
+int tplg_parse_tlv(snd_tplg_t *tplg, snd_config_t *cfg,
 	void *private ATTRIBUTE_UNUSED)
 {
 	snd_config_iterator_t i, next;
@@ -272,7 +272,7 @@ int parse_tlv(snd_tplg_t *tplg, snd_config_t *cfg,
 			continue;
 
 		if (strcmp(id, "scale") == 0) {
-			err = parse_tlv_dbscale(n, elem);
+			err = tplg_parse_tlv_dbscale(n, elem);
 			if (err < 0) {
 				fprintf(stderr, "error: failed to DBScale");
 				return err;
@@ -299,7 +299,7 @@ int parse_tlv(snd_tplg_t *tplg, snd_config_t *cfg,
  *	max "255"
  * }
  */
-int parse_control_bytes(snd_tplg_t *tplg,
+int tplg_parse_control_bytes(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_bytes_control *be;
@@ -410,7 +410,7 @@ int parse_control_bytes(snd_tplg_t *tplg,
  *	tlv "hsw_vol_tlv"
  * }
  */
-int parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
+int tplg_parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
 	void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_enum_control *ec;
@@ -465,7 +465,7 @@ int parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
 		}
 		
 		if (strcmp(id, "channel") == 0) {
-			err = parse_compound(tplg, n, parse_channel,
+			err = tplg_parse_compound(tplg, n, tplg_parse_channel,
 				ec->channel);
 			if (err < 0)
 				return err;
@@ -475,7 +475,7 @@ int parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
 		}
 
 		if (strcmp(id, "ops") == 0) {
-			err = parse_compound(tplg, n, parse_ops, &ec->hdr);
+			err = tplg_parse_compound(tplg, n, tplg_parse_ops, &ec->hdr);
 			if (err < 0)
 				return err;
 			continue;
@@ -515,7 +515,7 @@ int parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
  *	tlv "hsw_vol_tlv"
  * }
  */
-int parse_control_mixer(snd_tplg_t *tplg,
+int tplg_parse_control_mixer(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_mixer_control *mc;
@@ -562,7 +562,7 @@ int parse_control_mixer(snd_tplg_t *tplg,
 
 		if (strcmp(id, "channel") == 0) {
 
-			err = parse_compound(tplg, n, parse_channel,
+			err = tplg_parse_compound(tplg, n, tplg_parse_channel,
 				mc->channel);
 			if (err < 0)
 				return err;
@@ -594,7 +594,7 @@ int parse_control_mixer(snd_tplg_t *tplg,
 		}
 
 		if (strcmp(id, "ops") == 0) {
-			err = parse_compound(tplg, n, parse_ops, &mc->hdr);
+			err = tplg_parse_compound(tplg, n, tplg_parse_ops, &mc->hdr);
 			if (err < 0)
 				return err;
 			continue;

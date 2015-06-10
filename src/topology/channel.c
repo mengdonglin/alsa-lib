@@ -77,7 +77,7 @@ static int lookup_channel(const char *c, __le32 *id)
  *		shift "0" (shift)
  * }
  */
-int parse_channel(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
+int tplg_parse_channel(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 	snd_config_t *cfg, void *private)
 {
 	snd_config_iterator_t i, next;

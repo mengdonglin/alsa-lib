@@ -59,7 +59,7 @@ static int parse_text_values(snd_config_t *cfg, struct tplg_elem *elem)
  * 		]
  *	}
  */
-int parse_text(snd_tplg_t *tplg, snd_config_t *cfg,
+int tplg_parse_text(snd_tplg_t *tplg, snd_config_t *cfg,
 	void *private ATTRIBUTE_UNUSED)
 {
 	snd_config_iterator_t i, next;

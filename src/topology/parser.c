@@ -19,7 +19,7 @@
 /*
  * Parse compound
  */
-int parse_compound(snd_tplg_t *tplg, snd_config_t *cfg,
+int tplg_parse_compound(snd_tplg_t *tplg, snd_config_t *cfg,
 	int (*fcn)(snd_tplg_t *, snd_config_t *, void *),
 	void *private)
 {
@@ -74,91 +74,91 @@ static int tplg_parse_config(snd_tplg_t *tplg, snd_config_t *cfg)
 			continue;
 
 		if (strcmp(id, "SectionTLV") == 0) {
-			err = parse_compound(tplg, n, parse_tlv, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_tlv, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionControlMixer") == 0) {
-			err = parse_compound(tplg, n, parse_control_mixer, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_control_mixer, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionControlEnum") == 0) {
-			err = parse_compound(tplg, n, parse_control_enum, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_control_enum, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionControlBytes") == 0) {
-			err = parse_compound(tplg, n, parse_control_bytes, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_control_bytes, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionWidget") == 0) {
-			err = parse_compound(tplg, n, parse_dapm_widget, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_dapm_widget, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionPCMConfig") == 0) {
-			err = parse_compound(tplg, n, parse_pcm_config, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_pcm_config, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionPCMCapabilities") == 0) {
-			err = parse_compound(tplg, n, parse_pcm_caps, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_pcm_caps, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionPCM") == 0) {
-			err = parse_compound(tplg, n, parse_pcm, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_pcm, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionBE") == 0) {
-			err = parse_compound(tplg, n, parse_be, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_be, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionCC") == 0) {
-			err = parse_compound(tplg, n, parse_cc, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_cc, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionGraph") == 0) {
-			err = parse_compound(tplg, n, parse_dapm_graph, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_dapm_graph, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionText") == 0) {
-			err = parse_compound(tplg, n, parse_text, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_text, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionData") == 0) {
-			err = parse_compound(tplg, n, parse_data, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_data, NULL);
 			if (err < 0)
 				return err;
 			continue;
@@ -213,27 +213,27 @@ static int tplg_check_integ(snd_tplg_t *tplg)
 {
 	int err;
 
-	err = check_controls(tplg);
+	err = tplg_check_controls(tplg);
 	if (err <  0)
 		return err;
 
-	err = check_widgets(tplg);
+	err = tplg_check_widgets(tplg);
 	if (err <  0)
 		return err;
 
-	err = check_pcm_dai(tplg, PARSER_TYPE_PCM);
+	err = tplg_check_pcm_dai(tplg, PARSER_TYPE_PCM);
 	if (err <  0)
 		return err;
 
-	err = check_pcm_dai(tplg, PARSER_TYPE_BE);
+	err = tplg_check_pcm_dai(tplg, PARSER_TYPE_BE);
 	if (err <  0)
 		return err;
 
-	err = check_pcm_dai(tplg, PARSER_TYPE_CC);
+	err = tplg_check_pcm_dai(tplg, PARSER_TYPE_CC);
 	if (err <  0)
 		return err;
 
-	err = check_routes(tplg);
+	err = tplg_check_routes(tplg);
 	if (err <  0)
 		return err;
 

@@ -56,7 +56,7 @@ static int lookup_widget(const char *w)
 	return -EINVAL;
 }
 
-static int parse_dapm_mixers(snd_config_t *cfg, struct tplg_elem *elem)
+static int tplg_parse_dapm_mixers(snd_config_t *cfg, struct tplg_elem *elem)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
@@ -78,7 +78,7 @@ static int parse_dapm_mixers(snd_config_t *cfg, struct tplg_elem *elem)
 	return 0;
 }
 
-static int parse_dapm_enums(snd_config_t *cfg, struct tplg_elem *elem)
+static int tplg_parse_dapm_enums(snd_config_t *cfg, struct tplg_elem *elem)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
@@ -132,7 +132,7 @@ static int move_control(struct tplg_elem *elem, struct tplg_elem *ref)
 }
 
 /* check referenced controls for a widget */
-static int check_widget(snd_tplg_t *tplg,
+static int tplg_check_widget(snd_tplg_t *tplg,
 	struct tplg_elem *elem)
 {
 	struct tplg_ref *ref;
@@ -183,7 +183,7 @@ static int check_widget(snd_tplg_t *tplg,
 	return 0;
 }
 
-int check_widgets(snd_tplg_t *tplg)
+int tplg_check_widgets(snd_tplg_t *tplg)
 {
 
 	struct list_head *base, *pos, *npos;
@@ -199,7 +199,7 @@ int check_widgets(snd_tplg_t *tplg)
 			return -EINVAL;
 		}
 
-		err = check_widget(tplg, elem);
+		err = tplg_check_widget(tplg, elem);
 		if (err < 0)
 			return err;
 	}
@@ -207,7 +207,7 @@ int check_widgets(snd_tplg_t *tplg)
 	return 0;
 }
 
-int check_routes(snd_tplg_t *tplg)
+int tplg_check_routes(snd_tplg_t *tplg)
 {
 	struct list_head *base, *pos, *npos;
 	struct tplg_elem *elem;
@@ -261,7 +261,7 @@ int check_routes(snd_tplg_t *tplg)
 }
 
 /* line is defined as '"source, control, sink"' */
-static int parse_line(const char *text,
+static int tplg_parse_line(const char *text,
 	struct snd_soc_tplg_dapm_graph_elem *line)
 {
 	char buf[1024];
@@ -309,7 +309,7 @@ done:
 }
 
 
-static int parse_routes(snd_tplg_t *tplg, snd_config_t *cfg)
+static int tplg_parse_routes(snd_tplg_t *tplg, snd_config_t *cfg)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
@@ -339,7 +339,7 @@ static int parse_routes(snd_tplg_t *tplg, snd_config_t *cfg)
 
 		elem->route = line;
 
-		err = parse_line(val, line);
+		err = tplg_parse_line(val, line);
 		if (err < 0)
 			return err;
 
@@ -350,7 +350,7 @@ static int parse_routes(snd_tplg_t *tplg, snd_config_t *cfg)
 	return 0;
 }
 
-int parse_dapm_graph(snd_tplg_t *tplg, snd_config_t *cfg,
+int tplg_parse_dapm_graph(snd_tplg_t *tplg, snd_config_t *cfg,
 	void *private ATTRIBUTE_UNUSED)
 {
 	snd_config_iterator_t i, next;
@@ -373,7 +373,7 @@ int parse_dapm_graph(snd_tplg_t *tplg, snd_config_t *cfg,
 		}
 
 		if (strcmp(id, "lines") == 0) {
-			err = parse_routes(tplg, n);
+			err = tplg_parse_routes(tplg, n);
 			if (err < 0) {
 				fprintf(stderr, "error: failed to parse dapm graph %s\n", graph_id);
 				return err;
@@ -395,7 +395,7 @@ int parse_dapm_graph(snd_tplg_t *tplg, snd_config_t *cfg,
  *	enum
  * }
  */
-int parse_dapm_widget(snd_tplg_t *tplg,
+int tplg_parse_dapm_widget(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_dapm_widget *widget;
@@ -481,7 +481,7 @@ int parse_dapm_widget(snd_tplg_t *tplg,
 		}
 
 		if (strcmp(id, "enum") == 0) {
-			err = parse_dapm_enums(n, elem);
+			err = tplg_parse_dapm_enums(n, elem);
 			if (err < 0)
 				return err;
 
@@ -489,7 +489,7 @@ int parse_dapm_widget(snd_tplg_t *tplg,
 		}
 
 		if (strcmp(id, "mixer") == 0) {
-			err = parse_dapm_mixers(n, elem);
+			err = tplg_parse_dapm_mixers(n, elem);
 			if (err < 0)
 				return err;
 

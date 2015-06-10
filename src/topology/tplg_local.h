@@ -134,58 +134,58 @@ struct map_elem {
 	int id;
 };
 
-int parse_compound(snd_tplg_t *tplg, snd_config_t *cfg,
+int tplg_parse_compound(snd_tplg_t *tplg, snd_config_t *cfg,
 	int (*fcn)(snd_tplg_t *, snd_config_t *, void *),
 	void *private);
 
 int tplg_write_data(snd_tplg_t *tplg);
 
-int parse_tlv(snd_tplg_t *tplg, snd_config_t *cfg,
+int tplg_parse_tlv(snd_tplg_t *tplg, snd_config_t *cfg,
 	void *private ATTRIBUTE_UNUSED);
 
-int parse_text(snd_tplg_t *tplg, snd_config_t *cfg,
+int tplg_parse_text(snd_tplg_t *tplg, snd_config_t *cfg,
 	void *private ATTRIBUTE_UNUSED);
 
-int parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
+int tplg_parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 	void *private ATTRIBUTE_UNUSED);
 
-int parse_control_bytes(snd_tplg_t *tplg,
+int tplg_parse_control_bytes(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
 
-int parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
+int tplg_parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
 	void *private ATTRIBUTE_UNUSED);
 
-int parse_control_mixer(snd_tplg_t *tplg,
+int tplg_parse_control_mixer(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
 
-int parse_dapm_graph(snd_tplg_t *tplg, snd_config_t *cfg,
+int tplg_parse_dapm_graph(snd_tplg_t *tplg, snd_config_t *cfg,
 	void *private ATTRIBUTE_UNUSED);
 
-int parse_dapm_widget(snd_tplg_t *tplg,
+int tplg_parse_dapm_widget(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
 
-int parse_pcm_config(snd_tplg_t *tplg,
+int tplg_parse_pcm_config(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
 
-int parse_pcm_caps(snd_tplg_t *tplg,
+int tplg_parse_pcm_caps(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
 
-int parse_pcm_cap_cfg(snd_tplg_t *tplg, snd_config_t *cfg,
+int tplg_parse_pcm_cap_cfg(snd_tplg_t *tplg, snd_config_t *cfg,
 	void *private);
 
-int parse_pcm(snd_tplg_t *tplg,
+int tplg_parse_pcm(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
 
-int parse_be(snd_tplg_t *tplg,
+int tplg_parse_be(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
 
-int parse_cc(snd_tplg_t *tplg,
+int tplg_parse_cc(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
 
-int check_controls(snd_tplg_t *tplg);
-int check_widgets(snd_tplg_t *tplg);
-int check_routes(snd_tplg_t *tplg);
-int check_pcm_dai(snd_tplg_t *tplg, unsigned int type);
+int tplg_check_controls(snd_tplg_t *tplg);
+int tplg_check_widgets(snd_tplg_t *tplg);
+int tplg_check_routes(snd_tplg_t *tplg);
+int tplg_check_pcm_dai(snd_tplg_t *tplg, unsigned int type);
 
 int copy_data(struct tplg_elem *elem, struct tplg_elem *ref);
 
@@ -200,10 +200,10 @@ struct tplg_elem *lookup_element(struct list_head *base,
 struct tplg_elem* create_elem_common(snd_tplg_t *tplg,
 	snd_config_t *cfg, enum parser_type type);
 
-int parse_channel(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
+int tplg_parse_channel(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 	snd_config_t *cfg, void *private);
 
-int parse_ops(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
+int tplg_parse_ops(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 	snd_config_t *cfg, void *private);
 
 struct tplg_elem *lookup_pcm_dai_stream(struct list_head *base, const char* id);

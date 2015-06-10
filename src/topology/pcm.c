@@ -80,7 +80,7 @@ static void copy_pcm_config(const char *id,
 }
 
 /* check referenced config and caps for a pcm */
-static int check_pcm_cfg_caps(snd_tplg_t *tplg,
+static int tplg_check_pcm_cfg_caps(snd_tplg_t *tplg,
 	struct tplg_elem *elem)
 {
 	struct tplg_elem *ref_elem = NULL;
@@ -126,7 +126,7 @@ static int check_pcm_cfg_caps(snd_tplg_t *tplg,
 	return 0;
 }
 
-int check_pcm_dai(snd_tplg_t *tplg, unsigned int type)
+int tplg_check_pcm_dai(snd_tplg_t *tplg, unsigned int type)
 {
 	struct list_head *base, *pos, *npos;
 	struct tplg_elem *elem;
@@ -154,7 +154,7 @@ int check_pcm_dai(snd_tplg_t *tplg, unsigned int type)
 			return -EINVAL;
 		}
 
-		err = check_pcm_cfg_caps(tplg, elem);
+		err = tplg_check_pcm_cfg_caps(tplg, elem);
 		if (err < 0)
 			return err;			
 	}
@@ -176,7 +176,7 @@ static int lookup_pcm_format(const char *c, __le64 *format)
 	return -EINVAL;
 }
 
-static int parse_stream_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
+static int tplg_parse_stream_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 	snd_config_t *cfg, void *private)
 {
 	snd_config_iterator_t i, next;
@@ -254,7 +254,7 @@ static int parse_stream_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
  *	}
  * }
  */
-int parse_pcm_config(snd_tplg_t *tplg,
+int tplg_parse_pcm_config(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_stream_config *sc;
@@ -285,7 +285,7 @@ int parse_pcm_config(snd_tplg_t *tplg,
 			continue;
 
 		if (strcmp(id, "config") == 0) {
-			err = parse_compound(tplg, n, parse_stream_cfg, sc);
+			err = tplg_parse_compound(tplg, n, tplg_parse_stream_cfg, sc);
 			if (err < 0)
 				return err;
 			continue;
@@ -328,7 +328,7 @@ static int split_format(struct snd_soc_tplg_stream_caps *caps, char *str)
  *	channels_max "2"
  * } 
  */
-int parse_pcm_caps(snd_tplg_t *tplg,
+int tplg_parse_pcm_caps(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_stream_caps *sc;
@@ -393,7 +393,7 @@ int parse_pcm_caps(snd_tplg_t *tplg,
 	return 0;	
 }
 
-static int parse_pcm_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
+static int tplg_parse_pcm_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 	snd_config_t *cfg, void *private)
 {
 	struct snd_soc_tplg_pcm_cfg_caps *capconf = private;
@@ -429,7 +429,7 @@ static int parse_pcm_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
  *		]
  * }
  */
-int parse_pcm_cap_cfg(snd_tplg_t *tplg, snd_config_t *cfg,
+int tplg_parse_pcm_cap_cfg(snd_tplg_t *tplg, snd_config_t *cfg,
 	void *private)
 {
 	snd_config_iterator_t i, next;
@@ -480,7 +480,7 @@ int parse_pcm_cap_cfg(snd_tplg_t *tplg, snd_config_t *cfg,
 
 		if (strcmp(id, "configs") == 0) {
 			tplg_dbg("\t\tconfigs:\n");
-			err = parse_compound(tplg, n, parse_pcm_cfg,
+			err = tplg_parse_compound(tplg, n, tplg_parse_pcm_cfg,
 				&pcm_dai->capconf[stream]);
 			if (err < 0)
 				return err;
@@ -514,7 +514,7 @@ int parse_pcm_cap_cfg(snd_tplg_t *tplg, snd_config_t *cfg,
  *	}
  * }
  */
-int parse_pcm(snd_tplg_t *tplg,
+int tplg_parse_pcm(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_pcm_dai *pcm_dai;
@@ -564,7 +564,7 @@ int parse_pcm(snd_tplg_t *tplg,
 		}
 
 		if (strcmp(id, "pcm") == 0) {
-			err = parse_compound(tplg, n, parse_pcm_cap_cfg,
+			err = tplg_parse_compound(tplg, n, tplg_parse_pcm_cap_cfg,
 				elem);
 			if (err < 0)
 				return err;
@@ -598,7 +598,7 @@ int parse_pcm(snd_tplg_t *tplg,
  *	}
  * }
  */
-int parse_be(snd_tplg_t *tplg,
+int tplg_parse_be(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_pcm_dai *pcm_dai;
@@ -648,7 +648,7 @@ int parse_be(snd_tplg_t *tplg,
 		}
 
 		if (strcmp(id, "be") == 0) {
-			err = parse_compound(tplg, n, parse_pcm_cap_cfg,
+			err = tplg_parse_compound(tplg, n, tplg_parse_pcm_cap_cfg,
 				elem);
 			if (err < 0)
 				return err;
@@ -688,7 +688,7 @@ int parse_be(snd_tplg_t *tplg,
  *	} 
  * }
  */
-int parse_cc(snd_tplg_t *tplg,
+int tplg_parse_cc(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
 	struct snd_soc_tplg_pcm_dai *pcm_dai;
@@ -737,7 +737,7 @@ int parse_cc(snd_tplg_t *tplg,
 		}
 
 		if (strcmp(id, "cc") == 0) {
-			err = parse_compound(tplg, n, parse_pcm_cap_cfg,
+			err = tplg_parse_compound(tplg, n, tplg_parse_pcm_cap_cfg,
 				elem);
 			if (err < 0)
 				return err;

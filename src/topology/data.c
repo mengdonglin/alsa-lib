@@ -17,7 +17,7 @@
 #include "tplg_local.h"
 
 /* Get Private data from a file. */
-static int parse_data_file(snd_config_t *cfg, struct tplg_elem *elem)
+static int tplg_parse_data_file(snd_config_t *cfg, struct tplg_elem *elem)
 {
 	struct snd_soc_tplg_private *priv = NULL;
 	const char *value = NULL;
@@ -165,7 +165,7 @@ static int copy_data_hex(char *data, int off, const char *str, int width)
 	return 0;
 }
 
-static int parse_data_hex(snd_config_t *cfg, struct tplg_elem *elem,
+static int tplg_parse_data_hex(snd_config_t *cfg, struct tplg_elem *elem,
 	int width)
 {
 	struct snd_soc_tplg_private *priv;
@@ -218,7 +218,7 @@ static int parse_data_hex(snd_config_t *cfg, struct tplg_elem *elem,
  *		words
  *	}
  */
-int parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
+int tplg_parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 	void *private ATTRIBUTE_UNUSED)
 {
 	snd_config_iterator_t i, next;
@@ -239,7 +239,7 @@ int parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 		}
 
 		if (strcmp(id, "file") == 0) {
-			err = parse_data_file(n, elem);
+			err = tplg_parse_data_file(n, elem);
 			if (err < 0) {
 				fprintf(stderr, "error: failed to parse data file");
 				return err;
@@ -248,7 +248,7 @@ int parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 		}
 
 		if (strcmp(id, "bytes") == 0) {
-			err = parse_data_hex(n, elem, 1);
+			err = tplg_parse_data_hex(n, elem, 1);
 			if (err < 0) {
 				fprintf(stderr, "error: failed to parse data bytes");
 				return err;
@@ -257,7 +257,7 @@ int parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 		}
 
 		if (strcmp(id, "shorts") == 0) {
-			err = parse_data_hex(n, elem, 2);
+			err = tplg_parse_data_hex(n, elem, 2);
 			if (err < 0) {
 				fprintf(stderr, "error: failed to parse data shorts");
 				return err;
@@ -266,7 +266,7 @@ int parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 		}
 
 		if (strcmp(id, "words") == 0) {
-			err = parse_data_hex(n, elem, 4);
+			err = tplg_parse_data_hex(n, elem, 4);
 			if (err < 0) {
 				fprintf(stderr, "error: failed to parse data words");
 				return err;
