@@ -40,11 +40,11 @@ extern "C" {
 
 typedef struct snd_tplg snd_tplg_t;
 
-snd_tplg_t *snd_socfw_new(const char *name, int verbose);
-void snd_socfw_free(snd_tplg_t *tplg);
+snd_tplg_t *snd_tplg_new(void);
+void snd_tplg_free(snd_tplg_t *tplg);
 
-int snd_parse_conf(snd_tplg_t *tplg, const char *filename);
-
+int snd_tplg_build(snd_tplg_t *tplg, const char *infile, const char *outfile);
+void snd_tplg_verbose(snd_tplg_t *tplg, int verbose);
 
 #ifdef __cplusplus
 }

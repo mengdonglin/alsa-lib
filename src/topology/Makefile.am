@@ -1,6 +1,16 @@
 EXTRA_LTLIBRARIES = libtopology.la
 
-libtopology_la_SOURCES = parser.c builder.c
+libtopology_la_SOURCES =\
+	parser.c \
+	builder.c \
+	ctl.c \
+	dapm.c \
+	pcm.c \
+	data.c \
+	text.c \
+	channel.c \
+	ops.c \
+	elem.c
 
 noinst_HEADERS = tplg_local.h
 
