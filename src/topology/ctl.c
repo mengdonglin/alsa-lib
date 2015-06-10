@@ -47,15 +47,15 @@ static int tplg_check_mixer_control(snd_tplg_t *tplg,
 			continue;
 
 		if (ref->type == PARSER_TYPE_TLV) {
-			ref->elem = lookup_element(&tplg->tlv_list,
+			ref->elem = tplg_elem_lookup(&tplg->tlv_list,
 						ref->id, PARSER_TYPE_TLV);
 			if(ref->elem)
 				 err = copy_tlv(elem, ref->elem);
 
 		} else if (ref->type == PARSER_TYPE_DATA) {
-			ref->elem = lookup_element(&tplg->pdata_list,
+			ref->elem = tplg_elem_lookup(&tplg->pdata_list,
 						ref->id, PARSER_TYPE_DATA);
-			 err = copy_data(elem, ref->elem);
+			 err = tplg_copy_data(elem, ref->elem);
 		}
 
 		if (!ref->elem) {
@@ -95,15 +95,15 @@ static int tplg_check_enum_control(snd_tplg_t *tplg,
 			continue;
 
 		if (ref->type == PARSER_TYPE_TEXT) {
-			ref->elem = lookup_element(&tplg->text_list,
+			ref->elem = tplg_elem_lookup(&tplg->text_list,
 						ref->id, PARSER_TYPE_TEXT);
 			if (ref->elem)
 				copy_enum_texts(elem, ref->elem);
 
 		} else if (ref->type == PARSER_TYPE_DATA) {
-			ref->elem = lookup_element(&tplg->pdata_list,
+			ref->elem = tplg_elem_lookup(&tplg->pdata_list,
 						ref->id, PARSER_TYPE_DATA);
-			err = copy_data(elem, ref->elem);
+			err = tplg_copy_data(elem, ref->elem);
 		}
 		if (!ref->elem) {
 			fprintf(stderr, "Cannot find '%s' referenced by"
@@ -129,7 +129,7 @@ static int tplg_check_bytes_control(snd_tplg_t *tplg,
 		if (ref->id == NULL || ref->elem)
 			continue;
 		/* bytes control only reference one private data section */
-		ref->elem = lookup_element(&tplg->pdata_list,
+		ref->elem = tplg_elem_lookup(&tplg->pdata_list,
 			ref->id, PARSER_TYPE_DATA);
 		if (!ref->elem) {
 			fprintf(stderr, "Cannot find data '%s' referenced by"
@@ -138,7 +138,7 @@ static int tplg_check_bytes_control(snd_tplg_t *tplg,
 		}
 
 		/* copy texts to enum elem */
-		return copy_data(elem, ref->elem);
+		return tplg_copy_data(elem, ref->elem);
 	}
 
 	return 0;
@@ -261,7 +261,7 @@ int tplg_parse_tlv(snd_tplg_t *tplg, snd_config_t *cfg,
 	int err = 0;
 	struct tplg_elem *elem;
 
-	elem = create_elem_common(tplg, cfg, PARSER_TYPE_TLV);
+	elem = tplg_elem_new_common(tplg, cfg, PARSER_TYPE_TLV);
 	if (!elem)
 		return -ENOMEM;
 
@@ -308,7 +308,7 @@ int tplg_parse_control_bytes(snd_tplg_t *tplg,
 	snd_config_t *n;
 	const char *id, *val = NULL;	
 
-	elem = create_elem_common(tplg, cfg, PARSER_TYPE_BYTES);
+	elem = tplg_elem_new_common(tplg, cfg, PARSER_TYPE_BYTES);
 	if (!elem)
 		return -ENOMEM;
 
@@ -420,7 +420,7 @@ int tplg_parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
 	const char *id, *val = NULL;
 	int err;
 
-	elem = create_elem_common(tplg, cfg, PARSER_TYPE_ENUM);
+	elem = tplg_elem_new_common(tplg, cfg, PARSER_TYPE_ENUM);
 	if (!elem)
 		return -ENOMEM;
 
@@ -525,7 +525,7 @@ int tplg_parse_control_mixer(snd_tplg_t *tplg,
 	const char *id, *val = NULL;
 	int err;
 
-	elem = create_elem_common(tplg, cfg, PARSER_TYPE_MIXER);
+	elem = tplg_elem_new_common(tplg, cfg, PARSER_TYPE_MIXER);
 	if (!elem)
 		return -ENOMEM;
 

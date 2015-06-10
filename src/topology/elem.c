@@ -43,7 +43,7 @@ void free_ref_list(struct list_head *base)
 	}
 }
 
-struct tplg_elem *elem_new(void)
+struct tplg_elem *tplg_elem_new(void)
 {
 	struct tplg_elem *elem;
 
@@ -55,20 +55,20 @@ struct tplg_elem *elem_new(void)
 	return elem;
 }
 
-void elem_free(struct tplg_elem *elem)
+void tplg_elem_free(struct tplg_elem *elem)
 {
 	free_ref_list(&elem->ref_list);
 
 	/* free struct snd_tplg_ object,
 	 * the union pointers share the same address
 	 */
-	if(elem->mixer_ctrl)
+	if (elem->mixer_ctrl)
 		free(elem->mixer_ctrl);
 
 	free(elem);
 }
 
-void free_elem_list(struct list_head *base)
+void tplg_elem_free_list(struct list_head *base)
 {
 	struct list_head *pos, *npos;
 	struct tplg_elem *elem;
@@ -76,13 +76,12 @@ void free_elem_list(struct list_head *base)
 	list_for_each_safe(pos, npos, base) {
 		elem = list_entry(pos, struct tplg_elem, list);
 		list_del(&elem->list);
-		elem_free(elem);
+		tplg_elem_free(elem);
 	}
 }
 
-struct tplg_elem *lookup_element(struct list_head *base,
-				const char* id,
-				unsigned int type)
+struct tplg_elem *tplg_elem_lookup(struct list_head *base, const char* id,
+	unsigned int type)
 {
 	struct list_head *pos, *npos;
 	struct tplg_elem *elem;
@@ -98,7 +97,7 @@ struct tplg_elem *lookup_element(struct list_head *base,
 	return NULL;
 }
 
-struct tplg_elem* create_elem_common(snd_tplg_t *tplg,
+struct tplg_elem* tplg_elem_new_common(snd_tplg_t *tplg,
 	snd_config_t *cfg, enum parser_type type)
 {
 	struct tplg_elem *elem;
@@ -106,7 +105,7 @@ struct tplg_elem* create_elem_common(snd_tplg_t *tplg,
 	int obj_size = 0;
 	void *obj;
 
-	elem = elem_new();
+	elem = tplg_elem_new();
 	if (!elem)
 		return NULL;
 

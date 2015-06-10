@@ -127,7 +127,7 @@ static int move_control(struct tplg_elem *elem, struct tplg_elem *ref)
 
 	/* remove the control from global control list to avoid double output */
 	list_del(&ref->list);
-	elem_free(ref);
+	tplg_elem_free(ref);
 	return 0;
 }
 
@@ -150,23 +150,23 @@ static int tplg_check_widget(snd_tplg_t *tplg,
 
 		switch (ref->type) {
 			case PARSER_TYPE_MIXER:
-				ref->elem = lookup_element(&tplg->mixer_list,
+				ref->elem = tplg_elem_lookup(&tplg->mixer_list,
 							ref->id, PARSER_TYPE_MIXER);
 				if(ref->elem)
 					err =  move_control(elem, ref->elem);
 				break;
 
 			case PARSER_TYPE_ENUM:
-				ref->elem = lookup_element(&tplg->enum_list,
+				ref->elem = tplg_elem_lookup(&tplg->enum_list,
 							ref->id, PARSER_TYPE_ENUM);
 				if(ref->elem)
 					err =  move_control(elem, ref->elem);
 				break;
 
 			case PARSER_TYPE_DATA:
-				ref->elem = lookup_element(&tplg->pdata_list,
+				ref->elem = tplg_elem_lookup(&tplg->pdata_list,
 							ref->id, PARSER_TYPE_DATA);
-				err =  copy_data(elem, ref->elem);
+				err =  tplg_copy_data(elem, ref->elem);
 				break;
 			default:
 				break;
@@ -228,7 +228,7 @@ int tplg_check_routes(snd_tplg_t *tplg)
 			route->sink, route->control, route->source);
 
 		if (strlen(route->sink)
-			&& !lookup_element(&tplg->widget_list, route->sink,
+			&& !tplg_elem_lookup(&tplg->widget_list, route->sink,
 			PARSER_TYPE_DAPM_WIDGET)
 			&& !lookup_pcm_dai_stream(&tplg->pcm_list, route->sink)) {
 			fprintf(stderr, "Route: Undefined sink widget/stream '%s'\n",
@@ -237,9 +237,9 @@ int tplg_check_routes(snd_tplg_t *tplg)
 		}
 
 		if (strlen(route->control)) {
-			if (!lookup_element(&tplg->mixer_list,
+			if (!tplg_elem_lookup(&tplg->mixer_list,
 				route->control, PARSER_TYPE_MIXER) &&
-			!lookup_element(&tplg->enum_list,
+			!tplg_elem_lookup(&tplg->enum_list,
 				route->control, PARSER_TYPE_ENUM)) {
 				fprintf(stderr, "Route: Undefined mixer/enum control '%s'\n",
 					route->control);
@@ -248,7 +248,7 @@ int tplg_check_routes(snd_tplg_t *tplg)
 		}
 
 		if (strlen(route->source)
-			&& !lookup_element(&tplg->widget_list, route->source,
+			&& !tplg_elem_lookup(&tplg->widget_list, route->source,
 			PARSER_TYPE_DAPM_WIDGET)
 			&& !lookup_pcm_dai_stream(&tplg->pcm_list, route->source)) {
 			fprintf(stderr, "Route: Undefined source widget/stream '%s'\n",
@@ -324,7 +324,7 @@ static int tplg_parse_routes(snd_tplg_t *tplg, snd_config_t *cfg)
 		if (snd_config_get_string(n, &val) < 0)
 			continue;
 
-		elem = elem_new();
+		elem = tplg_elem_new();
 		if (!elem)
 			return -ENOMEM;
 
@@ -405,7 +405,7 @@ int tplg_parse_dapm_widget(snd_tplg_t *tplg,
 	const char *id, *val = NULL;
 	int widget_type, err;
 
-	elem = create_elem_common(tplg, cfg, PARSER_TYPE_DAPM_WIDGET);
+	elem = tplg_elem_new_common(tplg, cfg, PARSER_TYPE_DAPM_WIDGET);
 	if (!elem)
 		return -ENOMEM;
 

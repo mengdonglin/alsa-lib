@@ -187,17 +187,17 @@ int tplg_check_widgets(snd_tplg_t *tplg);
 int tplg_check_routes(snd_tplg_t *tplg);
 int tplg_check_pcm_dai(snd_tplg_t *tplg, unsigned int type);
 
-int copy_data(struct tplg_elem *elem, struct tplg_elem *ref);
+int tplg_copy_data(struct tplg_elem *elem, struct tplg_elem *ref);
 
 int add_ref(struct tplg_elem *elem, int type, const char* id);
 
-struct tplg_elem *elem_new(void);
-void elem_free(struct tplg_elem *elem);
-void free_elem_list(struct list_head *base);
-struct tplg_elem *lookup_element(struct list_head *base,
+struct tplg_elem *tplg_elem_new(void);
+void tplg_elem_free(struct tplg_elem *elem);
+void tplg_elem_free_list(struct list_head *base);
+struct tplg_elem *tplg_elem_lookup(struct list_head *base,
 				const char* id,
 				unsigned int type);
-struct tplg_elem* create_elem_common(snd_tplg_t *tplg,
+struct tplg_elem* tplg_elem_new_common(snd_tplg_t *tplg,
 	snd_config_t *cfg, enum parser_type type);
 
 int tplg_parse_channel(snd_tplg_t *tplg ATTRIBUTE_UNUSED,

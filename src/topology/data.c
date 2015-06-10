@@ -227,7 +227,7 @@ int tplg_parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 	int err = 0;
 	struct tplg_elem *elem;
 
-	elem = create_elem_common(tplg, cfg, PARSER_TYPE_DATA);
+	elem = tplg_elem_new_common(tplg, cfg, PARSER_TYPE_DATA);
 	if (!elem)
 		return -ENOMEM;
 
@@ -279,7 +279,7 @@ int tplg_parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 }
 
 /* copy private data into the bytes extended control */
-int copy_data(struct tplg_elem *elem, struct tplg_elem *ref)
+int tplg_copy_data(struct tplg_elem *elem, struct tplg_elem *ref)
 {
 	struct snd_soc_tplg_private *priv;
 	int priv_data_size;

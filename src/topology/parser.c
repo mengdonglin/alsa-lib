@@ -317,19 +317,19 @@ snd_tplg_t *snd_tplg_new(void)
 
 void snd_tplg_free(snd_tplg_t *tplg)
 {
-	free_elem_list(&tplg->tlv_list);
-	free_elem_list(&tplg->widget_list);
-	free_elem_list(&tplg->pcm_list);
-	free_elem_list(&tplg->be_list);
-	free_elem_list(&tplg->cc_list);
-	free_elem_list(&tplg->route_list);
-	free_elem_list(&tplg->pdata_list);
-	free_elem_list(&tplg->text_list);
-	free_elem_list(&tplg->pcm_config_list);
-	free_elem_list(&tplg->pcm_caps_list);
-	free_elem_list(&tplg->mixer_list);
-	free_elem_list(&tplg->enum_list);
-	free_elem_list(&tplg->bytes_ext_list);
+	tplg_elem_free_list(&tplg->tlv_list);
+	tplg_elem_free_list(&tplg->widget_list);
+	tplg_elem_free_list(&tplg->pcm_list);
+	tplg_elem_free_list(&tplg->be_list);
+	tplg_elem_free_list(&tplg->cc_list);
+	tplg_elem_free_list(&tplg->route_list);
+	tplg_elem_free_list(&tplg->pdata_list);
+	tplg_elem_free_list(&tplg->text_list);
+	tplg_elem_free_list(&tplg->pcm_config_list);
+	tplg_elem_free_list(&tplg->pcm_caps_list);
+	tplg_elem_free_list(&tplg->mixer_list);
+	tplg_elem_free_list(&tplg->enum_list);
+	tplg_elem_free_list(&tplg->bytes_ext_list);
 
 	free(tplg);
 }

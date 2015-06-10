@@ -68,7 +68,7 @@ int tplg_parse_text(snd_tplg_t *tplg, snd_config_t *cfg,
 	int err = 0;
 	struct tplg_elem *elem;
 
-	elem = create_elem_common(tplg, cfg, PARSER_TYPE_TEXT);
+	elem = tplg_elem_new_common(tplg, cfg, PARSER_TYPE_TEXT);
 	if (!elem)
 		return -ENOMEM;
 

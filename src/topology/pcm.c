@@ -105,14 +105,14 @@ static int tplg_check_pcm_cfg_caps(snd_tplg_t *tplg,
 	for (i = 0; i < 2; i++) {
 		capconf = &pcm_dai->capconf[i];
 
-		ref_elem = lookup_element(&tplg->pcm_caps_list,
+		ref_elem = tplg_elem_lookup(&tplg->pcm_caps_list,
 			capconf->caps.name, PARSER_TYPE_STREAM_CAPS);
 
 		if (ref_elem != NULL)
 			copy_pcm_caps(elem->id, &capconf->caps, ref_elem);
 
 		for (j = 0; j < capconf->num_configs; j++) {
-			ref_elem = lookup_element(&tplg->pcm_config_list,
+			ref_elem = tplg_elem_lookup(&tplg->pcm_config_list,
 				capconf->configs[j].name,
 				PARSER_TYPE_STREAM_CONFIG);
 
@@ -264,7 +264,7 @@ int tplg_parse_pcm_config(snd_tplg_t *tplg,
 	const char *id;
 	int err;
 
-	elem = create_elem_common(tplg, cfg, PARSER_TYPE_STREAM_CONFIG);
+	elem = tplg_elem_new_common(tplg, cfg, PARSER_TYPE_STREAM_CONFIG);
 	if (!elem)
 		return -ENOMEM;
 
@@ -339,7 +339,7 @@ int tplg_parse_pcm_caps(snd_tplg_t *tplg,
 	char *s;
 	int err;
 
-	elem = create_elem_common(tplg, cfg, PARSER_TYPE_STREAM_CAPS);
+	elem = tplg_elem_new_common(tplg, cfg, PARSER_TYPE_STREAM_CAPS);
 	if (!elem)
 		return -ENOMEM;
 
@@ -524,7 +524,7 @@ int tplg_parse_pcm(snd_tplg_t *tplg,
 	const char *id, *val = NULL;
 	int err;
 
-	elem = create_elem_common(tplg, cfg, PARSER_TYPE_PCM);
+	elem = tplg_elem_new_common(tplg, cfg, PARSER_TYPE_PCM);
 	if (!elem)
 		return -ENOMEM;
 
@@ -608,7 +608,7 @@ int tplg_parse_be(snd_tplg_t *tplg,
 	const char *id, *val = NULL;
 	int err;
 
-	elem = create_elem_common(tplg, cfg, PARSER_TYPE_BE);
+	elem = tplg_elem_new_common(tplg, cfg, PARSER_TYPE_BE);
 	if (!elem)
 		return -ENOMEM;
 
@@ -698,7 +698,7 @@ int tplg_parse_cc(snd_tplg_t *tplg,
 	const char *id, *val = NULL;
 	int err;
 
-	elem = create_elem_common(tplg, cfg, PARSER_TYPE_CC);
+	elem = tplg_elem_new_common(tplg, cfg, PARSER_TYPE_CC);
 	if (!elem)
 		return -ENOMEM;
 
