@@ -11,6 +11,9 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   General Public License for more details.
 
+  Authors: Mengdong Lin <mengdong.lin@intel.com>
+           Yao Jin <yao.jin@intel.com>
+           Liam Girdwood <liam.r.girdwood@linux.intel.com>
 */
 
 #include "list.h"
@@ -31,6 +34,20 @@ static const struct map_elem pcm_format_map[] = {
 	{"U32_LE", SNDRV_PCM_FORMAT_U32_LE},
 	{"U32_BE", SNDRV_PCM_FORMAT_U32_BE},
 };
+
+static int lookup_pcm_format(const char *c, __le64 *format)
+{
+	unsigned int i;
+
+	for (i = 0; i < ARRAY_SIZE(pcm_format_map); i++) {
+		if (strcmp(pcm_format_map[i].name, c) == 0) {
+			*format = pcm_format_map[i].id;
+			return 0;
+		}
+	}
+
+	return -EINVAL;
+}
 
 struct tplg_elem *lookup_pcm_dai_stream(struct list_head *base, const char* id)
 {
@@ -68,8 +85,7 @@ static void copy_pcm_caps(const char *id, struct snd_soc_tplg_stream_caps *caps,
 
 /* copy referenced config to the pcm */
 static void copy_pcm_config(const char *id,
-	struct snd_soc_tplg_stream_config *cfg,
-	struct tplg_elem *ref_elem)
+	struct snd_soc_tplg_stream_config *cfg, struct tplg_elem *ref_elem)
 {
 	struct snd_soc_tplg_stream_config *ref_cfg = ref_elem->stream_cfg;
 
@@ -80,8 +96,7 @@ static void copy_pcm_config(const char *id,
 }
 
 /* check referenced config and caps for a pcm */
-static int tplg_check_pcm_cfg_caps(snd_tplg_t *tplg,
-	struct tplg_elem *elem)
+static int tplg_check_pcm_cfg_caps(snd_tplg_t *tplg, struct tplg_elem *elem)
 {
 	struct tplg_elem *ref_elem = NULL;
 	struct snd_soc_tplg_pcm_cfg_caps *capconf;
@@ -150,7 +165,7 @@ int tplg_check_pcm_dai(snd_tplg_t *tplg, unsigned int type)
 
 		elem = list_entry(pos, struct tplg_elem, list);
 		if (elem->type != type) {
-			fprintf(stderr, "Invalid elem '%s'\n", elem->id);
+			fprintf(stderr, "error: invalid elem '%s'\n", elem->id);
 			return -EINVAL;
 		}
 
@@ -160,20 +175,6 @@ int tplg_check_pcm_dai(snd_tplg_t *tplg, unsigned int type)
 	}
 
 	return 0;
-}
-
-static int lookup_pcm_format(const char *c, __le64 *format)
-{
-	unsigned int i;
-
-	for (i = 0; i < ARRAY_SIZE(pcm_format_map); i++) {
-		if (strcmp(pcm_format_map[i].name, c) == 0) {
-			*format = pcm_format_map[i].id;
-			return 0;
-		}
-	}
-
-	return -EINVAL;
 }
 
 static int tplg_parse_stream_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
@@ -213,22 +214,32 @@ static int tplg_parse_stream_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 		if (strcmp(id, "format") == 0) {
 			ret = lookup_pcm_format(val, &format);
 			if (ret < 0) {
-				fprintf(stderr, "Unsupported stream format %s\n",
+				fprintf(stderr, "error: unsupported stream format %s\n",
 					val);
 				return -EINVAL;
 			}
 		
 			stream->format = format;
 			tplg_dbg("\t\t%s: %s\n", id, val);
-		} else if (strcmp(id, "rate") == 0) {
+			continue;
+		}
+
+		if (strcmp(id, "rate") == 0) {
 			stream->rate = atoi(val);		
 			tplg_dbg("\t\t%s: %d\n", id, stream->rate);
-		} else if (strcmp(id, "channels") == 0) {
+			continue;
+		}
+
+		if (strcmp(id, "channels") == 0) {
 			stream->channels = atoi(val);		
 			tplg_dbg("\t\t%s: %d\n", id, stream->channels);
-		} else if (strcmp(id, "tdm_slot") == 0) {
+			continue;
+		} 
+
+		if (strcmp(id, "tdm_slot") == 0) {
 			stream->tdm_slot = strtol(val, NULL, 16);
 			tplg_dbg("\t\t%s: 0x%x\n", id, stream->tdm_slot);
+			continue;
 		}
 	}
 
@@ -285,7 +296,8 @@ int tplg_parse_pcm_config(snd_tplg_t *tplg,
 			continue;
 
 		if (strcmp(id, "config") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_stream_cfg, sc);
+			err = tplg_parse_compound(tplg, n,
+				tplg_parse_stream_cfg, sc);
 			if (err < 0)
 				return err;
 			continue;
@@ -305,7 +317,7 @@ static int split_format(struct snd_soc_tplg_stream_caps *caps, char *str)
 	while ((s != NULL) && (i < SND_SOC_TPLG_MAX_FORMATS)) {
 		ret = lookup_pcm_format(s, &format);
 		if (ret < 0) {
-			fprintf(stderr, "Unsupported stream format %s\n", s);
+			fprintf(stderr, "error: unsupported stream format %s\n", s);
 			return -EINVAL;
 		}
 
@@ -375,18 +387,31 @@ int tplg_parse_pcm_caps(snd_tplg_t *tplg,
 				return err;
 
 			tplg_dbg("\t\t%s: %s\n", id, val);
-		} else if (strcmp(id, "rate_min") == 0) {
+			continue;
+		}
+
+		if (strcmp(id, "rate_min") == 0) {
 			sc->rate_min = atoi(val);
 			tplg_dbg("\t\t%s: %d\n", id, sc->rate_min);
-		} else if (strcmp(id, "rate_max") == 0) {
+			continue;
+		}
+
+		if (strcmp(id, "rate_max") == 0) {
 			sc->rate_max = atoi(val);
 			tplg_dbg("\t\t%s: %d\n", id, sc->rate_max);
-		} else if (strcmp(id, "channels_min") == 0) {
+			continue;
+		}
+
+		if (strcmp(id, "channels_min") == 0) {
 			sc->channels_min = atoi(val);
 			tplg_dbg("\t\t%s: %d\n", id, sc->channels_min);
-		} else if (strcmp(id, "channels_max") == 0) {
+			continue;
+		}
+
+		if (strcmp(id, "channels_max") == 0) {
 			sc->channels_max = atoi(val);
 			tplg_dbg("\t\t%s: %d\n", id, sc->channels_max);
+			continue;
 		}
 	}
 
@@ -535,6 +560,7 @@ int tplg_parse_pcm(snd_tplg_t *tplg,
 	tplg_dbg(" PCM: %s\n", elem->id);
 
 	snd_config_for_each(i, next, cfg) {
+
 		n = snd_config_iterator_entry(i);
 		if (snd_config_get_id(n, &id) < 0)
 			continue;
@@ -564,8 +590,8 @@ int tplg_parse_pcm(snd_tplg_t *tplg,
 		}
 
 		if (strcmp(id, "pcm") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_pcm_cap_cfg,
-				elem);
+			err = tplg_parse_compound(tplg, n,
+				tplg_parse_pcm_cap_cfg, elem);
 			if (err < 0)
 				return err;
 			continue;
@@ -619,6 +645,7 @@ int tplg_parse_be(snd_tplg_t *tplg,
 	tplg_dbg(" BE: %s\n", elem->id);
 
 	snd_config_for_each(i, next, cfg) {
+
 		n = snd_config_iterator_entry(i);
 		if (snd_config_get_id(n, &id) < 0)
 			continue;
@@ -648,8 +675,8 @@ int tplg_parse_be(snd_tplg_t *tplg,
 		}
 
 		if (strcmp(id, "be") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_pcm_cap_cfg,
-				elem);
+			err = tplg_parse_compound(tplg, n,
+				tplg_parse_pcm_cap_cfg, elem);
 			if (err < 0)
 				return err;
 			continue;
@@ -708,6 +735,7 @@ int tplg_parse_cc(snd_tplg_t *tplg,
 	tplg_dbg(" CC: %s\n", elem->id);
 
 	snd_config_for_each(i, next, cfg) {
+
 		n = snd_config_iterator_entry(i);
 		if (snd_config_get_id(n, &id) < 0)
 			continue;
@@ -737,8 +765,8 @@ int tplg_parse_cc(snd_tplg_t *tplg,
 		}
 
 		if (strcmp(id, "cc") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_pcm_cap_cfg,
-				elem);
+			err = tplg_parse_compound(tplg, n,
+				tplg_parse_pcm_cap_cfg, elem);
 			if (err < 0)
 				return err;
 			continue;

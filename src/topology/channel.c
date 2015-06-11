@@ -11,6 +11,9 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   General Public License for more details.
 
+  Authors: Mengdong Lin <mengdong.lin@intel.com>
+           Yao Jin <yao.jin@intel.com>
+           Liam Girdwood <liam.r.girdwood@linux.intel.com>
 */
 
 #include "list.h"
@@ -87,14 +90,15 @@ int tplg_parse_channel(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 	int ret;
 
 	snd_config_get_id(cfg, &id);
+	tplg_dbg("\tChannel %s\n", id);
+
 	ret = lookup_channel(id, &channel->id);
 	if (ret < 0) {
-		fprintf(stderr, "invalid channel %s\n", id);
+		fprintf(stderr, "error: invalid channel %s\n", id);
 		return ret;
 	}
 
 	channel->size = sizeof(*channel);
-	tplg_dbg("\tChannel %s\n", id);
 
 	snd_config_for_each(i, next, cfg) {
 

@@ -11,6 +11,9 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   General Public License for more details.
 
+  Authors: Mengdong Lin <mengdong.lin@intel.com>
+           Yao Jin <yao.jin@intel.com>
+           Liam Girdwood <liam.r.girdwood@linux.intel.com>
 */
 
 #include "list.h"
@@ -32,7 +35,7 @@ int tplg_parse_compound(snd_tplg_t *tplg, snd_config_t *cfg,
 		return -EINVAL;
 
 	if (snd_config_get_type(cfg) != SND_CONFIG_TYPE_COMPOUND) {
-		fprintf(stderr, "compound type expected for %s", id);
+		fprintf(stderr, "error: compound type expected for %s", id);
 		return -EINVAL;
 	}
 
@@ -41,7 +44,7 @@ int tplg_parse_compound(snd_tplg_t *tplg, snd_config_t *cfg,
 		n = snd_config_iterator_entry(i);
 
 		if (snd_config_get_type(cfg) != SND_CONFIG_TYPE_COMPOUND) {
-			fprintf(stderr, "compound type expected for %s, is %d",
+			fprintf(stderr, "error: compound type expected for %s, is %d",
 				id, snd_config_get_type(cfg));
 			return -EINVAL;
 		}
@@ -62,7 +65,7 @@ static int tplg_parse_config(snd_tplg_t *tplg, snd_config_t *cfg)
 	int err;
 
 	if (snd_config_get_type(cfg) != SND_CONFIG_TYPE_COMPOUND) {
-		fprintf(stderr, "compound type expected for master file");
+		fprintf(stderr, "error: compound type expected at top level");
 		return -EINVAL;
 	}
 
@@ -74,97 +77,110 @@ static int tplg_parse_config(snd_tplg_t *tplg, snd_config_t *cfg)
 			continue;
 
 		if (strcmp(id, "SectionTLV") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_tlv, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_tlv,
+				NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionControlMixer") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_control_mixer, NULL);
+			err = tplg_parse_compound(tplg, n,
+				tplg_parse_control_mixer, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionControlEnum") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_control_enum, NULL);
+			err = tplg_parse_compound(tplg, n,
+				tplg_parse_control_enum, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionControlBytes") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_control_bytes, NULL);
+			err = tplg_parse_compound(tplg, n,
+				tplg_parse_control_bytes, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionWidget") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_dapm_widget, NULL);
+			err = tplg_parse_compound(tplg, n,
+				tplg_parse_dapm_widget, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionPCMConfig") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_pcm_config, NULL);
+			err = tplg_parse_compound(tplg, n,
+				tplg_parse_pcm_config, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionPCMCapabilities") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_pcm_caps, NULL);
+			err = tplg_parse_compound(tplg, n,
+				tplg_parse_pcm_caps, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionPCM") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_pcm, NULL);
+			err = tplg_parse_compound(tplg, n,
+				tplg_parse_pcm, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionBE") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_be, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_be,
+				NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionCC") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_cc, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_cc,
+				NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionGraph") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_dapm_graph, NULL);
+			err = tplg_parse_compound(tplg, n,
+				tplg_parse_dapm_graph, NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionText") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_text, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_text,
+				NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
 		if (strcmp(id, "SectionData") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_data, NULL);
+			err = tplg_parse_compound(tplg, n, tplg_parse_data,
+				NULL);
 			if (err < 0)
 				return err;
 			continue;
 		}
 
-		fprintf(stderr, "uknown section %s\n", id);
+		fprintf(stderr, "error: unknown section %s\n", id);
 	}
 	return 0;
 }
@@ -185,7 +201,8 @@ static int tplg_load_config(const char *file, snd_config_t **cfg)
 	err = snd_input_stdio_attach(&in, fp, 1);
 	if (err < 0) {
 	      __err:
-		fprintf(stdout, "could not open configuration file %s", file);
+		fprintf(stdout, "error: could not open configuration file %s",
+			file);
 		return err;
 	}
 	err = snd_config_top(&top);
@@ -194,7 +211,8 @@ static int tplg_load_config(const char *file, snd_config_t **cfg)
 
 	err = snd_config_load(top, in);
 	if (err < 0) {
-		fprintf(stdout, "could not load configuration file %s", file);
+		fprintf(stdout, "error: could not load configuration file %s",
+			file);
 		snd_config_delete(top);
 		return err;
 	}
@@ -251,31 +269,33 @@ int snd_tplg_build(snd_tplg_t *tplg, const char *infile, const char *outfile)
 	tplg->out_fd =
 		open(outfile, O_RDWR | O_CREAT, S_IRWXU | S_IRWXG | S_IRWXO);
 	if (tplg->out_fd < 0) {
-		fprintf(stderr, "failed to open %s err %d\n", outfile, -errno);
+		fprintf(stderr, "error: failed to open %s err %d\n",
+			outfile, -errno);
 		return -errno;
 	}
 
 	err = tplg_load_config(infile, &cfg);
 	if (err < 0) {
-		fprintf(stderr, "Failed to load topology file %s\n", infile);
+		fprintf(stderr, "error: failed to load topology file %s\n",
+			infile);
 		return err;
 	}
 
 	err = tplg_parse_config(tplg, cfg);
 	if (err < 0) {
-		fprintf(stderr, "Failed to parse topology\n");
+		fprintf(stderr, "error: failed to parse topology\n");
 		goto out;
 	}
 
 	err = tplg_check_integ(tplg);
 	if (err < 0) {
-		fprintf(stderr, "Failed to check topology integrity\n");
+		fprintf(stderr, "error: failed to check topology integrity\n");
 		goto out;
 	}
 
 	err = tplg_write_data(tplg);
 	if (err < 0) {
-		fprintf(stderr, "Failed to write data %d\n", err);
+		fprintf(stderr, "error: failed to write data %d\n", err);
 		goto out;
 	}
 

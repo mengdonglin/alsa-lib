@@ -11,12 +11,15 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   General Public License for more details.
 
+  Authors: Mengdong Lin <mengdong.lin@intel.com>
+           Yao Jin <yao.jin@intel.com>
+           Liam Girdwood <liam.r.girdwood@linux.intel.com>
 */
 
 #include "list.h"
 #include "tplg_local.h"
 
-int add_ref(struct tplg_elem *elem, int type, const char* id)
+int tplg_ref_add(struct tplg_elem *elem, int type, const char* id)
 {
 	struct tplg_ref *ref;
 
@@ -31,7 +34,7 @@ int add_ref(struct tplg_elem *elem, int type, const char* id)
 	return 0;
 }
 
-void free_ref_list(struct list_head *base)
+void tplg_ref_free_list(struct list_head *base)
 {
 	struct list_head *pos, *npos;
 	struct tplg_ref *ref;
@@ -57,7 +60,7 @@ struct tplg_elem *tplg_elem_new(void)
 
 void tplg_elem_free(struct tplg_elem *elem)
 {
-	free_ref_list(&elem->ref_list);
+	tplg_ref_free_list(&elem->ref_list);
 
 	/* free struct snd_tplg_ object,
 	 * the union pointers share the same address
@@ -97,6 +100,7 @@ struct tplg_elem *tplg_elem_lookup(struct list_head *base, const char* id,
 	return NULL;
 }
 
+/* create a new common element and object */
 struct tplg_elem* tplg_elem_new_common(snd_tplg_t *tplg,
 	snd_config_t *cfg, enum parser_type type)
 {
@@ -176,6 +180,7 @@ struct tplg_elem* tplg_elem_new_common(snd_tplg_t *tplg,
 		return NULL;
 	}
 
+	/* create new object too if required */
 	if (obj_size > 0) {
 		obj = calloc(1, obj_size);
 		if (obj == NULL) {

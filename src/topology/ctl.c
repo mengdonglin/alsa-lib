@@ -11,6 +11,9 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   General Public License for more details.
 
+  Authors: Mengdong Lin <mengdong.lin@intel.com>
+           Yao Jin <yao.jin@intel.com>
+           Liam Girdwood <liam.r.girdwood@linux.intel.com>
 */
 
 #include "list.h"
@@ -59,7 +62,7 @@ static int tplg_check_mixer_control(snd_tplg_t *tplg,
 		}
 
 		if (!ref->elem) {
-			fprintf(stderr, "Cannot find '%s' referenced by"
+			fprintf(stderr, "error: cannot find '%s' referenced by"
 				" control '%s'\n", ref->id, elem->id);
 			return -EINVAL;
 		} else if (err < 0)
@@ -106,7 +109,7 @@ static int tplg_check_enum_control(snd_tplg_t *tplg,
 			err = tplg_copy_data(elem, ref->elem);
 		}
 		if (!ref->elem) {
-			fprintf(stderr, "Cannot find '%s' referenced by"
+			fprintf(stderr, "error: cannot find '%s' referenced by"
 				" control '%s'\n", ref->id, elem->id);
 			return -EINVAL;
 		} else if (err < 0)
@@ -117,23 +120,26 @@ static int tplg_check_enum_control(snd_tplg_t *tplg,
 }
 
 /* check referenced private data for a byte control */
-static int tplg_check_bytes_control(snd_tplg_t *tplg,
-				struct tplg_elem *elem)
+static int tplg_check_bytes_control(snd_tplg_t *tplg, struct tplg_elem *elem)
 {
 	struct tplg_ref *ref;
 	struct list_head *base, *pos, *npos;
 
 	base = &elem->ref_list;
+
 	list_for_each_safe(pos, npos, base) {
+
 		ref = list_entry(pos, struct tplg_ref, list);
 		if (ref->id == NULL || ref->elem)
 			continue;
+
 		/* bytes control only reference one private data section */
 		ref->elem = tplg_elem_lookup(&tplg->pdata_list,
 			ref->id, PARSER_TYPE_DATA);
 		if (!ref->elem) {
-			fprintf(stderr, "Cannot find data '%s' referenced by"
-				" control '%s'\n", ref->id, elem->id);
+			fprintf(stderr, "error: cannot find data '%s'"
+				" referenced by control '%s'\n",
+				ref->id, elem->id);
 			return -EINVAL;
 		}
 
@@ -152,6 +158,7 @@ int tplg_check_controls(snd_tplg_t *tplg)
 
 	base = &tplg->mixer_list;
 	list_for_each_safe(pos, npos, base) {
+
 		elem = list_entry(pos, struct tplg_elem, list);
 		err = tplg_check_mixer_control(tplg, elem);
 		if (err < 0)
@@ -160,6 +167,7 @@ int tplg_check_controls(snd_tplg_t *tplg)
 
 	base = &tplg->enum_list;
 	list_for_each_safe(pos, npos, base) {
+
 		elem = list_entry(pos, struct tplg_elem, list);
 		err = tplg_check_enum_control(tplg, elem);
 		if (err < 0)
@@ -168,6 +176,7 @@ int tplg_check_controls(snd_tplg_t *tplg)
 
 	base = &tplg->bytes_ext_list;
 	list_for_each_safe(pos, npos, base) {
+
 		elem = list_entry(pos, struct tplg_elem, list);
 		err = tplg_check_bytes_control(tplg, elem);
 		if (err < 0)
@@ -214,7 +223,7 @@ static int tplg_parse_tlv_dbscale(snd_config_t *cfg, struct tplg_elem *elem)
 
 		/* get ID */
 		if (snd_config_get_id(n, &id) < 0) {
-			fprintf(stderr, "cant get ID\n");
+			fprintf(stderr, "error: cant get ID\n");
 			return -EINVAL;
 		}
 
@@ -232,7 +241,7 @@ static int tplg_parse_tlv_dbscale(snd_config_t *cfg, struct tplg_elem *elem)
 		else if (strcmp(id, "mute") == 0)
 			data[2] = atoi(value);
 		else
-			fprintf(stderr, "unknown key %s\n", id);
+			fprintf(stderr, "error: unknown key %s\n", id);
 	}
 
 	/* SND_SOC_TPLG_TLV_SIZE must be > 3 */
@@ -379,7 +388,7 @@ int tplg_parse_control_bytes(snd_tplg_t *tplg,
 			if (snd_config_get_string(n, &val) < 0)
 				return -EINVAL;
 
-			add_ref(elem, PARSER_TYPE_DATA, val);
+			tplg_ref_add(elem, PARSER_TYPE_DATA, val);
 			tplg_dbg("\t%s: %s\n", id, val);
 			continue;
 		}
@@ -459,7 +468,7 @@ int tplg_parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
 			if (snd_config_get_string(n, &val) < 0)
 				return -EINVAL;
 
-			add_ref(elem, PARSER_TYPE_TEXT, val);
+			tplg_ref_add(elem, PARSER_TYPE_TEXT, val);
 			tplg_dbg("\t%s: %s\n", id, val);
 			continue;
 		}
@@ -475,7 +484,8 @@ int tplg_parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
 		}
 
 		if (strcmp(id, "ops") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_ops, &ec->hdr);
+			err = tplg_parse_compound(tplg, n, tplg_parse_ops,
+				&ec->hdr);
 			if (err < 0)
 				return err;
 			continue;
@@ -485,7 +495,7 @@ int tplg_parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
 			if (snd_config_get_string(n, &val) < 0)
 				return -EINVAL;
 
-			add_ref(elem, PARSER_TYPE_DATA, val);
+			tplg_ref_add(elem, PARSER_TYPE_DATA, val);
 			tplg_dbg("\t%s: %s\n", id, val);
 			continue;
 		}
@@ -594,7 +604,8 @@ int tplg_parse_control_mixer(snd_tplg_t *tplg,
 		}
 
 		if (strcmp(id, "ops") == 0) {
-			err = tplg_parse_compound(tplg, n, tplg_parse_ops, &mc->hdr);
+			err = tplg_parse_compound(tplg, n, tplg_parse_ops,
+				&mc->hdr);
 			if (err < 0)
 				return err;
 			continue;
@@ -604,7 +615,7 @@ int tplg_parse_control_mixer(snd_tplg_t *tplg,
 			if (snd_config_get_string(n, &val) < 0)
 				return -EINVAL;
 
-			err = add_ref(elem, PARSER_TYPE_TLV, val);
+			err = tplg_ref_add(elem, PARSER_TYPE_TLV, val);
 			if (err < 0)
 				return err;				
 
@@ -616,7 +627,7 @@ int tplg_parse_control_mixer(snd_tplg_t *tplg,
 			if (snd_config_get_string(n, &val) < 0)
 				return -EINVAL;
 
-			add_ref(elem, PARSER_TYPE_DATA, val);
+			tplg_ref_add(elem, PARSER_TYPE_DATA, val);
 			tplg_dbg("\t%s: %s\n", id, val);
 			continue;
 		}

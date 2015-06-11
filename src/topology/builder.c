@@ -11,21 +11,28 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   General Public License for more details.
 
+  Authors: Mengdong Lin <mengdong.lin@intel.com>
+           Yao Jin <yao.jin@intel.com>
+           Liam Girdwood <liam.r.girdwood@linux.intel.com>
 */
 
 #include "list.h"
 #include "tplg_local.h"
 
+/* verbose output detailing each object size and file position */
 static void verbose(snd_tplg_t *tplg, const char *fmt, ...)
 {
-	int offset = lseek(tplg->out_fd, 0, SEEK_CUR);
+	int offset;
 	va_list va;
 
+	if (!tplg->verbose)
+		return;
+
+	offset = lseek(tplg->out_fd, 0, SEEK_CUR);
+
 	va_start(va, fmt);
-	if (tplg->verbose) {
-		fprintf(stdout, "0x%6.6x/%6.6d -", offset, offset);
-		vfprintf(stdout, fmt, va);
-	}
+	fprintf(stdout, "0x%6.6x/%6.6d -", offset, offset);
+	vfprintf(stdout, fmt, va);
 	va_end(va);
 }
 

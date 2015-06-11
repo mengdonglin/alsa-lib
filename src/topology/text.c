@@ -11,12 +11,17 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   General Public License for more details.
 
+  Authors: Mengdong Lin <mengdong.lin@intel.com>
+           Yao Jin <yao.jin@intel.com>
+           Liam Girdwood <liam.r.girdwood@linux.intel.com>
+
 */
 
 #include "list.h"
 #include "tplg_local.h"
 
-#define TEXT_SIZE_MAX	(SND_SOC_TPLG_NUM_TEXTS * SNDRV_CTL_ELEM_ID_NAME_MAXLEN)
+#define TEXT_SIZE_MAX \
+	(SND_SOC_TPLG_NUM_TEXTS * SNDRV_CTL_ELEM_ID_NAME_MAXLEN)
 
 static int parse_text_values(snd_config_t *cfg, struct tplg_elem *elem)
 {
@@ -39,7 +44,8 @@ static int parse_text_values(snd_config_t *cfg, struct tplg_elem *elem)
 		if (snd_config_get_string(n, &value) < 0)
 			continue;
 
-		strncpy(&elem->texts[j][0], value, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+		strncpy(&elem->texts[j][0], value,
+			SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
 		tplg_dbg("\t%s\n", &elem->texts[j][0]);
 		
 		j++;

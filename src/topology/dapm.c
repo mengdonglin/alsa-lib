@@ -11,6 +11,9 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   General Public License for more details.
 
+  Authors: Mengdong Lin <mengdong.lin@intel.com>
+           Yao Jin <yao.jin@intel.com>
+           Liam Girdwood <liam.r.girdwood@linux.intel.com>
 */
 
 #include "list.h"
@@ -71,7 +74,7 @@ static int tplg_parse_dapm_mixers(snd_config_t *cfg, struct tplg_elem *elem)
 		if (snd_config_get_string(n, &value) < 0)
 			continue;
 
-		add_ref(elem, PARSER_TYPE_MIXER, value);
+		tplg_ref_add(elem, PARSER_TYPE_MIXER, value);
 		tplg_dbg("\t\t %s\n", value);
 	}
 
@@ -93,7 +96,7 @@ static int tplg_parse_dapm_enums(snd_config_t *cfg, struct tplg_elem *elem)
 		if (snd_config_get_string(n, &value) < 0)
 			continue;
 
-		add_ref(elem, PARSER_TYPE_ENUM, value);
+		tplg_ref_add(elem, PARSER_TYPE_ENUM, value);
 		tplg_dbg("\t\t %s\n", value);
 	}
 
@@ -109,7 +112,8 @@ static int move_control(struct tplg_elem *elem, struct tplg_elem *ref)
 
 	tplg_dbg("Control '%s' used by '%s'\n", ref->id, elem->id);
 	tplg_dbg("\tparent size: %d + %d -> %d, priv size -> %d\n",
-		elem->size, ref->size, elem->size + ref->size, widget->priv.size);
+		elem->size, ref->size, elem->size + ref->size,
+		widget->priv.size);
 
 	widget = realloc(widget, elem->size + ref->size);
 	if (!widget)
@@ -125,7 +129,7 @@ static int move_control(struct tplg_elem *elem, struct tplg_elem *ref)
 
 	elem->size += ref->size;
 
-	/* remove the control from global control list to avoid double output */
+	/* remove control from global control list to avoid double output */
 	list_del(&ref->list);
 	tplg_elem_free(ref);
 	return 0;
@@ -149,34 +153,38 @@ static int tplg_check_widget(snd_tplg_t *tplg,
 			continue;
 
 		switch (ref->type) {
-			case PARSER_TYPE_MIXER:
-				ref->elem = tplg_elem_lookup(&tplg->mixer_list,
-							ref->id, PARSER_TYPE_MIXER);
-				if(ref->elem)
-					err =  move_control(elem, ref->elem);
-				break;
+		case PARSER_TYPE_MIXER:
+			ref->elem = tplg_elem_lookup(&tplg->mixer_list,
+						ref->id, PARSER_TYPE_MIXER);
+			if (ref->elem)
+				err =  move_control(elem, ref->elem);
+			break;
 
-			case PARSER_TYPE_ENUM:
-				ref->elem = tplg_elem_lookup(&tplg->enum_list,
-							ref->id, PARSER_TYPE_ENUM);
-				if(ref->elem)
-					err =  move_control(elem, ref->elem);
-				break;
+		case PARSER_TYPE_ENUM:
+			ref->elem = tplg_elem_lookup(&tplg->enum_list,
+						ref->id, PARSER_TYPE_ENUM);
+			if (ref->elem)
+				err =  move_control(elem, ref->elem);
+			break;
 
-			case PARSER_TYPE_DATA:
-				ref->elem = tplg_elem_lookup(&tplg->pdata_list,
-							ref->id, PARSER_TYPE_DATA);
-				err =  tplg_copy_data(elem, ref->elem);
-				break;
-			default:
-				break;
+		case PARSER_TYPE_DATA:
+			ref->elem = tplg_elem_lookup(&tplg->pdata_list,
+						ref->id, PARSER_TYPE_DATA);
+			if (ref->elem)
+				err = tplg_copy_data(elem, ref->elem);
+			break;
+		default:
+			break;
 		}
 
 		if (!ref->elem) {
-			fprintf(stderr, "Cannot find control '%s' referenced by"
-				" widget '%s'\n", ref->id, elem->id);
+			fprintf(stderr, "error: cannot find control '%s'"
+				" referenced by widget '%s'\n",
+				ref->id, elem->id);
 			return -EINVAL;
-		} else  if (err < 0) 
+		}
+
+		if (err < 0) 
 			return err;
 	}
 
@@ -194,8 +202,9 @@ int tplg_check_widgets(snd_tplg_t *tplg)
 	list_for_each_safe(pos, npos, base) {
 
 		elem = list_entry(pos, struct tplg_elem, list);
-		if (!elem->widget|| elem->type != PARSER_TYPE_DAPM_WIDGET) {
-			fprintf(stderr, "Invalid widget '%s'\n", elem->id);
+		if (!elem->widget || elem->type != PARSER_TYPE_DAPM_WIDGET) {
+			fprintf(stderr, "error: invalid widget '%s'\n",
+				elem->id);
 			return -EINVAL;
 		}
 
@@ -219,7 +228,8 @@ int tplg_check_routes(snd_tplg_t *tplg)
 		elem = list_entry(pos, struct tplg_elem, list);
 
 		if (!elem->route || elem->type != PARSER_TYPE_DAPM_GRAPH) {
-			fprintf(stderr, "Invalid route '%s'\n", elem->id);
+			fprintf(stderr, "error: invalid route '%s'\n",
+				elem->id);
 			return -EINVAL;
 		}
 
@@ -227,31 +237,42 @@ int tplg_check_routes(snd_tplg_t *tplg)
 		tplg_dbg("\nCheck route: sink '%s', control '%s', source '%s'\n",
 			route->sink, route->control, route->source);
 
-		if (strlen(route->sink)
-			&& !tplg_elem_lookup(&tplg->widget_list, route->sink,
-			PARSER_TYPE_DAPM_WIDGET)
-			&& !lookup_pcm_dai_stream(&tplg->pcm_list, route->sink)) {
-			fprintf(stderr, "Route: Undefined sink widget/stream '%s'\n",
+		/* validate sink */
+		if (strlen(route->sink) <= 0) {
+			fprintf(stderr, "error: no sink\n");
+			return -EINVAL;
+
+		}
+		if (!tplg_elem_lookup(&tplg->widget_list, route->sink,
+			PARSER_TYPE_DAPM_WIDGET) &&
+			!lookup_pcm_dai_stream(&tplg->pcm_list, route->sink)) {
+			fprintf(stderr, "error: undefined sink widget/stream '%s'\n",
 				route->sink);
 			return -EINVAL;
 		}
 
+		/* validate control name */
 		if (strlen(route->control)) {
 			if (!tplg_elem_lookup(&tplg->mixer_list,
 				route->control, PARSER_TYPE_MIXER) &&
 			!tplg_elem_lookup(&tplg->enum_list,
 				route->control, PARSER_TYPE_ENUM)) {
-				fprintf(stderr, "Route: Undefined mixer/enum control '%s'\n",
+				fprintf(stderr, "error: Undefined mixer/enum control '%s'\n",
 					route->control);
 			return -EINVAL;
 			}
 		}
 
-		if (strlen(route->source)
-			&& !tplg_elem_lookup(&tplg->widget_list, route->source,
-			PARSER_TYPE_DAPM_WIDGET)
-			&& !lookup_pcm_dai_stream(&tplg->pcm_list, route->source)) {
-			fprintf(stderr, "Route: Undefined source widget/stream '%s'\n",
+		/* validate source */
+		if (strlen(route->source) <= 0) {
+			fprintf(stderr, "error: no source\n");
+			return -EINVAL;
+
+		}
+		if (!tplg_elem_lookup(&tplg->widget_list, route->source,
+			PARSER_TYPE_DAPM_WIDGET) &&
+			!lookup_pcm_dai_stream(&tplg->pcm_list, route->source)) {
+			fprintf(stderr, "error: Undefined source widget/stream '%s'\n",
 				route->source);
 			return -EINVAL;
 		}
@@ -260,15 +281,17 @@ int tplg_check_routes(snd_tplg_t *tplg)
 	return 0;
 }
 
+#define LINE_SIZE	1024
+
 /* line is defined as '"source, control, sink"' */
 static int tplg_parse_line(const char *text,
 	struct snd_soc_tplg_dapm_graph_elem *line)
 {
-	char buf[1024];
+	char buf[LINE_SIZE];
 	unsigned int len, i;
 	const char *source = NULL, *sink = NULL, *control = NULL;
 
-	strncpy(buf, text, 1024);
+	strncpy(buf, text, LINE_SIZE);
 
 	len = strlen(buf);
 	if (len <= 2) {
@@ -362,6 +385,7 @@ int tplg_parse_dapm_graph(snd_tplg_t *tplg, snd_config_t *cfg,
 		fprintf(stderr, "error: compound is expected for dapm graph definition\n");
 		return -EINVAL;
 	}
+
 	snd_config_get_id(cfg, &graph_id);
 
 	snd_config_for_each(i, next, cfg) {
@@ -375,7 +399,8 @@ int tplg_parse_dapm_graph(snd_tplg_t *tplg, snd_config_t *cfg,
 		if (strcmp(id, "lines") == 0) {
 			err = tplg_parse_routes(tplg, n);
 			if (err < 0) {
-				fprintf(stderr, "error: failed to parse dapm graph %s\n", graph_id);
+				fprintf(stderr, "error: failed to parse dapm graph %s\n",
+					graph_id);
 				return err;
 			}
 			continue;
@@ -409,13 +434,14 @@ int tplg_parse_dapm_widget(snd_tplg_t *tplg,
 	if (!elem)
 		return -ENOMEM;
 
+	tplg_dbg(" Widget: %s\n", elem->id);
+
 	widget = elem->widget;
 	strncpy(widget->name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
 	widget->size = elem->size;
 
-	tplg_dbg(" Widget: %s\n", elem->id);
-
 	snd_config_for_each(i, next, cfg) {
+
 		n = snd_config_iterator_entry(i);
 		if (snd_config_get_id(n, &id) < 0)
 			continue;
@@ -500,7 +526,7 @@ int tplg_parse_dapm_widget(snd_tplg_t *tplg,
 			if (snd_config_get_string(n, &val) < 0)
 				return -EINVAL;
 
-			add_ref(elem, PARSER_TYPE_DATA, val);
+			tplg_ref_add(elem, PARSER_TYPE_DATA, val);
 			tplg_dbg("\t%s: %s\n", id, val);
 			continue;
 		}

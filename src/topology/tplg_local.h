@@ -22,6 +22,15 @@
 #include <sound/asoc.h>
 #include <sound/tlv.h>
 
+#define TPLG_DEBUG
+#ifdef TPLG_DEBUG
+#define tplg_dbg SNDERR
+#else
+#define tplg_dbg(fmt, arg...) do { } while (0)
+#endif
+
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
+
 struct tplg_ref;
 struct tplg_elem;
 
@@ -41,10 +50,6 @@ enum parser_type {
 	PARSER_TYPE_BE,
 	PARSER_TYPE_CC,
 };
-
-#define CHUNK_SIZE 	4096
-#define TLV_DB_SCALE_SIZE (sizeof(u32) * 3)
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
 struct snd_tplg {
 
@@ -189,7 +194,7 @@ int tplg_check_pcm_dai(snd_tplg_t *tplg, unsigned int type);
 
 int tplg_copy_data(struct tplg_elem *elem, struct tplg_elem *ref);
 
-int add_ref(struct tplg_elem *elem, int type, const char* id);
+int tplg_ref_add(struct tplg_elem *elem, int type, const char* id);
 
 struct tplg_elem *tplg_elem_new(void);
 void tplg_elem_free(struct tplg_elem *elem);
@@ -206,12 +211,6 @@ int tplg_parse_channel(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 int tplg_parse_ops(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 	snd_config_t *cfg, void *private);
 
-struct tplg_elem *lookup_pcm_dai_stream(struct list_head *base, const char* id);
-
-#define TPLG_DEBUG
-#ifdef TPLG_DEBUG
-#define tplg_dbg SNDERR
-#else
-#define tplg_dbg(fmt, arg...) do { } while (0)
-#endif
+struct tplg_elem *lookup_pcm_dai_stream(struct list_head *base,
+	const char* id);
 

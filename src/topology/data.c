@@ -11,6 +11,9 @@
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   General Public License for more details.
 
+  Authors: Mengdong Lin <mengdong.lin@intel.com>
+           Yao Jin <yao.jin@intel.com>
+           Liam Girdwood <liam.r.girdwood@linux.intel.com>
 */
 
 #include "list.h"
@@ -22,9 +25,8 @@ static int tplg_parse_data_file(snd_config_t *cfg, struct tplg_elem *elem)
 	struct snd_soc_tplg_private *priv = NULL;
 	const char *value = NULL;
 	FILE *fp;
-	size_t size;
-	size_t bytes_read;
-	int err = 0;
+	size_t size, bytes_read;
+	int ret = 0;
 
 	tplg_dbg("data DataFile: %s\n", elem->id);
 
@@ -33,30 +35,30 @@ static int tplg_parse_data_file(snd_config_t *cfg, struct tplg_elem *elem)
 
 	fp = fopen(value, "r");
 	if (fp == NULL) {
-		fprintf(stderr, "Invalid Data file path '%s'\n", value);
-		err = -errno;
-		goto __err;
+		fprintf(stderr, "error: invalid data file path '%s'\n", value);
+		ret = -errno;
+		goto err;
 	}
 
 	fseek(fp, 0L, SEEK_END);
 	size = ftell(fp);
 	fseek(fp, 0L, SEEK_SET);
 	if (size <= 0) {
-		fprintf(stderr, "Invalid Data file size %zu\n", size);
-		err = -EINVAL;
-		goto __err;
+		fprintf(stderr, "error: invalid data file size %zu\n", size);
+		ret = -EINVAL;
+		goto err;
 	}
 
 	priv = calloc(1, sizeof(*priv) + size);
 	if (!priv) {
-		err = -ENOMEM;
-		goto __err;
+		ret = -ENOMEM;
+		goto err;
 	}
 
 	bytes_read = fread(&priv->data, 1, size, fp);
 	if (bytes_read != size) {
-		err = -errno;
-		goto __err;
+		ret = -errno;
+		goto err;
 	}
 
 	elem->data = priv;
@@ -64,10 +66,10 @@ static int tplg_parse_data_file(snd_config_t *cfg, struct tplg_elem *elem)
 	elem->size = sizeof(*priv) + size;
 	return 0;
 
-__err:
+err:
 	if (priv)
 		free(priv);
-	return err;
+	return ret;
 }
 
 static void dump_priv_data(struct tplg_elem *elem)
@@ -291,39 +293,43 @@ int tplg_copy_data(struct tplg_elem *elem, struct tplg_elem *ref)
 	priv_data_size = ref->data->size;
 
 	switch (elem->type) {
-		case PARSER_TYPE_MIXER:
-			elem->mixer_ctrl = realloc(elem->mixer_ctrl, elem->size + priv_data_size);
-			if (!elem->mixer_ctrl)
-				return -ENOMEM;
-			priv = &elem->mixer_ctrl->priv;
-			break;
+	case PARSER_TYPE_MIXER:
+		elem->mixer_ctrl = realloc(elem->mixer_ctrl,
+			elem->size + priv_data_size);
+		if (!elem->mixer_ctrl)
+			return -ENOMEM;
+		priv = &elem->mixer_ctrl->priv;
+		break;
 
-		case PARSER_TYPE_ENUM:
-			elem->enum_ctrl = realloc(elem->enum_ctrl, elem->size + priv_data_size);
-			if (!elem->enum_ctrl)
-				return -ENOMEM;
-			priv = &elem->enum_ctrl->priv;
-			break;
+	case PARSER_TYPE_ENUM:
+		elem->enum_ctrl = realloc(elem->enum_ctrl,
+			elem->size + priv_data_size);
+		if (!elem->enum_ctrl)
+			return -ENOMEM;
+		priv = &elem->enum_ctrl->priv;
+		break;
 
-		case PARSER_TYPE_BYTES:
-			elem->bytes_ext = realloc(elem->bytes_ext, elem->size + priv_data_size);
-			if (!elem->bytes_ext)
-				return -ENOMEM;
-			priv = &elem->bytes_ext->priv;
-			break;
+	case PARSER_TYPE_BYTES:
+		elem->bytes_ext = realloc(elem->bytes_ext,
+			elem->size + priv_data_size);
+		if (!elem->bytes_ext)
+			return -ENOMEM;
+		priv = &elem->bytes_ext->priv;
+		break;
 
 
-		case PARSER_TYPE_DAPM_WIDGET:
-			elem->widget = realloc(elem->widget, elem->size + priv_data_size);
-			if (!elem->widget)
-				return -ENOMEM;
-			priv = &elem->widget->priv;
-			break;
+	case PARSER_TYPE_DAPM_WIDGET:
+		elem->widget = realloc(elem->widget,
+			elem->size + priv_data_size);
+		if (!elem->widget)
+			return -ENOMEM;
+		priv = &elem->widget->priv;
+		break;
 
-		default:
-			fprintf(stderr, "elem '%s': type %d shall not have private data\n",
-				elem->id, elem->type);
-			return -EINVAL;
+	default:
+		fprintf(stderr, "elem '%s': type %d shall not have private data\n",
+			elem->id, elem->type);
+		return -EINVAL;
 	}
 
 	elem->size += priv_data_size;
