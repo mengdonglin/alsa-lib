@@ -410,14 +410,18 @@ int tplg_parse_dapm_graph(snd_tplg_t *tplg, snd_config_t *cfg,
 	return 0;
 }
 
-/* Parse widget
+/* DAPM Widget.
  *
  * SectionWidget."widget name" {
  *
- *	index
- *	type
- *	no_pm
- *	enum
+ *	index "1"
+ *	type "aif_in"
+ *	no_pm "true"
+ *	shift "0"
+ *	invert "1
+ *	mixer "name"
+ *	enum "name"
+ *	data "name"
  * }
  */
 int tplg_parse_dapm_widget(snd_tplg_t *tplg,

@@ -177,6 +177,17 @@ int tplg_check_pcm_dai(snd_tplg_t *tplg, unsigned int type)
 	return 0;
 }
 
+/* PCM stream configuration
+ *
+ * Describes the PCM configuration for playback and capture streams.
+ *
+ *	config."name" {
+ *		format "S24_LE"
+ *		rate "48000"
+ *		channels "2"
+ *		tdm_slot "0xf"
+ *      }
+ */
 static int tplg_parse_stream_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 	snd_config_t *cfg, void *private)
 {
@@ -251,17 +262,11 @@ static int tplg_parse_stream_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
  * SectionPCMConfig."PCM config name" {
  *
  *	config."playback" {
- *		format
- *		rate
- *		channels
- *		tdm_slot
+ *
  *	}
  *
  *	config."capture" {
- *		format
- *		rate
- *		channels
- *		tdm_slot
+ *
  *	}
  * }
  */
