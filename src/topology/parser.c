@@ -190,41 +190,43 @@ static int tplg_load_config(const char *file, snd_config_t **cfg)
 	FILE *fp;
 	snd_input_t *in;
 	snd_config_t *top;
-	int err;
+	int ret;
 
 	fp = fopen(file, "r");
 	if (fp == NULL) {
-		err = -errno;
-		goto __err;
-	}
-
-	err = snd_input_stdio_attach(&in, fp, 1);
-	if (err < 0) {
-	      __err:
 		fprintf(stdout, "error: could not open configuration file %s",
 			file);
-		return err;
+		return -errno;
 	}
-	err = snd_config_top(&top);
-	if (err < 0)
-		return err;
 
-	err = snd_config_load(top, in);
-	if (err < 0) {
+	ret = snd_input_stdio_attach(&in, fp, 1);
+	if (ret < 0) {
+		fprintf(stdout, "error: could not attach stdio %s", file);
+		goto err;
+	}
+	ret = snd_config_top(&top);
+	if (ret < 0)
+		goto err;
+
+	ret = snd_config_load(top, in);
+	if (ret < 0) {
 		fprintf(stdout, "error: could not load configuration file %s",
 			file);
-		snd_config_delete(top);
-		return err;
+		goto err_load;
 	}
 
-	err = snd_input_close(in);
-	if (err < 0) {
-		snd_config_delete(top);
-		return err;
-	}
+	ret = snd_input_close(in);
+	if (ret < 0)
+		goto err_load;
 
 	*cfg = top;
 	return 0;
+
+err_load:
+	snd_config_delete(top);
+err:
+	fclose(fp);
+	return ret;
 }
 
 static int tplg_check_integ(snd_tplg_t *tplg)

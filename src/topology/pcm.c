@@ -35,7 +35,7 @@ static const struct map_elem pcm_format_map[] = {
 	{"U32_BE", SNDRV_PCM_FORMAT_U32_BE},
 };
 
-static int lookup_pcm_format(const char *c, __le64 *format)
+static int lookup_pcm_format(const char *c, snd_pcm_format_t *format)
 {
 	unsigned int i;
 
@@ -196,7 +196,7 @@ static int tplg_parse_stream_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 	struct snd_soc_tplg_stream_config *sc = private;
 	struct snd_soc_tplg_stream *stream;
 	const char *id, *val;
-	__le64 format;
+	snd_pcm_format_t format;
 	int ret;
 
 	snd_config_get_id(cfg, &id);
@@ -315,7 +315,7 @@ int tplg_parse_pcm_config(snd_tplg_t *tplg,
 static int split_format(struct snd_soc_tplg_stream_caps *caps, char *str)
 {
 	char *s = NULL;
-	__le64 format;
+	snd_pcm_format_t format;
 	int i = 0, ret;
 
 	s = strtok(str, ",");
@@ -428,7 +428,7 @@ static int tplg_parse_pcm_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 {
 	struct snd_soc_tplg_pcm_cfg_caps *capconf = private;
 	struct snd_soc_tplg_stream_config *configs = capconf->configs;
-	__le32 *num_configs = &capconf->num_configs;
+	unsigned int *num_configs = &capconf->num_configs;
 	const char *value;
 
 	if (*num_configs == SND_SOC_TPLG_STREAM_CONFIG_MAX)
