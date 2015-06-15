@@ -510,6 +510,15 @@ int tplg_parse_dapm_widget(snd_tplg_t *tplg,
 			continue;
 		}
 
+		if (strcmp(id, "subseq") == 0) {
+			if (snd_config_get_string(n, &val) < 0)
+				return -EINVAL;
+
+			widget->subseq= atoi(val);
+			tplg_dbg("\t%s: %d\n", id, widget->subseq);
+			continue;
+		}
+
 		if (strcmp(id, "event_type") == 0) {
 			if (snd_config_get_string(n, &val) < 0)
 				return -EINVAL;
