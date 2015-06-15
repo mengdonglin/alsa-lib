@@ -510,6 +510,24 @@ int tplg_parse_dapm_widget(snd_tplg_t *tplg,
 			continue;
 		}
 
+		if (strcmp(id, "event_type") == 0) {
+			if (snd_config_get_string(n, &val) < 0)
+				return -EINVAL;
+
+			widget->event_type = atoi(val);
+			tplg_dbg("\t%s: %d\n", id, widget->event_type);
+			continue;
+		}
+
+		if (strcmp(id, "event_flags") == 0) {
+			if (snd_config_get_string(n, &val) < 0)
+				return -EINVAL;
+
+			widget->event_flags = atoi(val);
+			tplg_dbg("\t%s: %d\n", id, widget->event_flags);
+			continue;
+		}
+
 		if (strcmp(id, "enum") == 0) {
 			err = tplg_parse_dapm_enums(n, elem);
 			if (err < 0)
