@@ -29,7 +29,7 @@ int tplg_parse_compound(snd_tplg_t *tplg, snd_config_t *cfg,
 	const char *id;
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
-	int err;
+	int err = -EINVAL;
 
 	if (snd_config_get_id(cfg, &id) < 0)
 		return -EINVAL;
@@ -54,7 +54,7 @@ int tplg_parse_compound(snd_tplg_t *tplg, snd_config_t *cfg,
 			return err;
 	}
 
-	return 0;
+	return err;
 }
 
 static int tplg_parse_config(snd_tplg_t *tplg, snd_config_t *cfg)
