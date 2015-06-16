@@ -147,6 +147,11 @@ static int calc_block_size(struct list_head *base)
 	list_for_each_safe(pos, npos, base) {
 
 		elem = list_entry(pos, struct tplg_elem, list);
+
+		/* compound elems have already been copied to other elems */
+		if (elem->compound_elem)
+			continue;
+
 		size += elem->size;
 	}
 
