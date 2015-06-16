@@ -471,12 +471,18 @@ int tplg_parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
 		}
 		
 		if (strcmp(id, "channel") == 0) {
+			if (ec->num_channels >= SND_SOC_TPLG_MAX_CHAN) {
+				fprintf(stderr, "error: too many channels %s\n",
+					elem->id);
+				return -EINVAL;
+			}
+
 			err = tplg_parse_compound(tplg, n, tplg_parse_channel,
-				ec->channel);
+				&ec->channel[ec->num_channels]);
 			if (err < 0)
 				return err;
 			
-			ec->num_channels = err;
+			ec->num_channels++;
 			continue;
 		}
 
@@ -571,13 +577,18 @@ int tplg_parse_control_mixer(snd_tplg_t *tplg,
 		}
 
 		if (strcmp(id, "channel") == 0) {
+			if (mc->num_channels >= SND_SOC_TPLG_MAX_CHAN) {
+				fprintf(stderr, "error: too many channels %s\n",
+					elem->id);
+				return -EINVAL;
+			}
 
 			err = tplg_parse_compound(tplg, n, tplg_parse_channel,
-				mc->channel);
+				&mc->channel[mc->num_channels]);
 			if (err < 0)
 				return err;
 
-			mc->num_channels = err;
+			mc->num_channels++;
 			continue;
 		}
 
