@@ -104,7 +104,7 @@ static int tplg_parse_dapm_enums(snd_config_t *cfg, struct tplg_elem *elem)
 }
 
 /* move referenced controls to the widget */
-static int move_control(struct tplg_elem *elem, struct tplg_elem *ref)
+static int copy_dapm_control(struct tplg_elem *elem, struct tplg_elem *ref)
 {
 	struct snd_soc_tplg_dapm_widget *widget = elem->widget;
 	struct snd_soc_tplg_mixer_control *mixer_ctrl = ref->mixer_ctrl;
@@ -129,10 +129,7 @@ static int move_control(struct tplg_elem *elem, struct tplg_elem *ref)
 
 	elem->size += ref->size;
 	widget->num_kcontrols++;
-
-	/* remove control from global control list to avoid double output */
-	list_del(&ref->list);
-	tplg_elem_free(ref);
+	elem->compound_elem = 1;
 	return 0;
 }
 
@@ -158,14 +155,14 @@ static int tplg_check_widget(snd_tplg_t *tplg,
 			ref->elem = tplg_elem_lookup(&tplg->mixer_list,
 						ref->id, PARSER_TYPE_MIXER);
 			if (ref->elem)
-				err =  move_control(elem, ref->elem);
+				err = copy_dapm_control(elem, ref->elem);
 			break;
 
 		case PARSER_TYPE_ENUM:
 			ref->elem = tplg_elem_lookup(&tplg->enum_list,
 						ref->id, PARSER_TYPE_ENUM);
 			if (ref->elem)
-				err =  move_control(elem, ref->elem);
+				err = copy_dapm_control(elem, ref->elem);
 			break;
 
 		case PARSER_TYPE_DATA:

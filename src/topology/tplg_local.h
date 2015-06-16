@@ -105,6 +105,7 @@ struct tplg_elem {
 	enum parser_type type;
 
 	int size; /* total size of this object inc pdata and ref objects */
+	int compound_elem; /* dont write this element as individual elem */
 
 	/* UAPI object for this elem */
 	union {

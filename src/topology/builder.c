@@ -107,6 +107,10 @@ static int write_elem_block(snd_tplg_t *tplg,
 
 		elem = list_entry(pos, struct tplg_elem, list);
 
+		/* compound elems have already been copied to other elems */
+		if (elem->compound_elem)
+			continue;
+
 		if (elem->type != PARSER_TYPE_DAPM_GRAPH)
 			verbose(tplg, " %s '%s': write %d bytes\n",
 				obj_name, elem->id, elem->size);
