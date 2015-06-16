@@ -59,14 +59,13 @@ static const struct map_elem channel_map[] = {
 };
 
 
-static int lookup_channel(const char *c, int *id)
+static int lookup_channel(const char *c)
 {
 	unsigned int i;
 
 	for (i = 0; i < ARRAY_SIZE(channel_map); i++) {
 		if (strcasecmp(channel_map[i].name, c) == 0) {
-			*id = channel_map[i].id; 
-			return 0;
+			return channel_map[i].id;
 		}
 	}
 
@@ -92,13 +91,14 @@ int tplg_parse_channel(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 	snd_config_get_id(cfg, &id);
 	tplg_dbg("\tChannel %s\n", id);
 
-	ret = lookup_channel(id, &channel->id);
-	if (ret < 0) {
+	channel->id = lookup_channel(id);
+	if (channel->id < 0) {
 		fprintf(stderr, "error: invalid channel %s\n", id);
 		return ret;
 	}
 
 	channel->size = sizeof(*channel);
+	tplg_dbg("\tChan %s = %d\n", id, channel->id);
 
 	snd_config_for_each(i, next, cfg) {
 
