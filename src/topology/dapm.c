@@ -128,6 +128,7 @@ static int move_control(struct tplg_elem *elem, struct tplg_elem *ref)
 		memcpy((void*)widget + elem->size, enum_ctrl, ref->size);
 
 	elem->size += ref->size;
+	widget->num_kcontrols++;
 
 	/* remove control from global control list to avoid double output */
 	list_del(&ref->list);
