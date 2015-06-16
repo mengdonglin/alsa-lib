@@ -437,6 +437,7 @@ int tplg_parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
 		SNDRV_CTL_ELEM_ACCESS_READWRITE;
 	ec->hdr.type =  SND_SOC_TPLG_TYPE_ENUM;
 	ec->size = elem->size;
+	tplg->channel_idx = 0;
 
 	tplg_dbg(" Control Enum: %s\n", elem->id);
 
@@ -478,11 +479,11 @@ int tplg_parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
 			}
 
 			err = tplg_parse_compound(tplg, n, tplg_parse_channel,
-				&ec->channel[ec->num_channels]);
+				ec->channel);
 			if (err < 0)
 				return err;
 			
-			ec->num_channels++;
+			ec->num_channels = tplg->channel_idx;
 			continue;
 		}
 
@@ -552,6 +553,7 @@ int tplg_parse_control_mixer(snd_tplg_t *tplg,
 		SNDRV_CTL_ELEM_ACCESS_READWRITE;
 	mc->hdr.type =  SND_SOC_TPLG_TYPE_MIXER;
 	mc->size = elem->size;
+	tplg->channel_idx = 0;
 
 	tplg_dbg(" Control Mixer: %s\n", elem->id);
 
@@ -584,11 +586,11 @@ int tplg_parse_control_mixer(snd_tplg_t *tplg,
 			}
 
 			err = tplg_parse_compound(tplg, n, tplg_parse_channel,
-				&mc->channel[mc->num_channels]);
+				mc->channel);
 			if (err < 0)
 				return err;
 
-			mc->num_channels++;
+			mc->num_channels = tplg->channel_idx;
 			continue;
 		}
 

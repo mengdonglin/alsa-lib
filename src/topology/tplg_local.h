@@ -66,6 +66,7 @@ struct snd_tplg {
 	/* runtime state */
 	unsigned int next_hdr_pos;
 	int index;
+	int channel_idx;
 
 	/* list of each element type */
 	struct list_head tlv_list;

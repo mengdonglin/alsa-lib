@@ -79,22 +79,25 @@ static int lookup_channel(const char *c)
  *		shift "0" (shift)
  * }
  */
-int tplg_parse_channel(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
+int tplg_parse_channel(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private)
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
 	struct snd_soc_tplg_channel *channel = private;
 	const char *id, *value;
-	int ret;
 
+	if (tplg->channel_idx >= SND_SOC_TPLG_MAX_CHAN)
+		return -EINVAL;
+
+	channel += tplg->channel_idx;
 	snd_config_get_id(cfg, &id);
-	tplg_dbg("\tChannel %s\n", id);
+	tplg_dbg("\tChannel %s at index %d\n", id, tplg->channel_idx);
 
 	channel->id = lookup_channel(id);
 	if (channel->id < 0) {
 		fprintf(stderr, "error: invalid channel %s\n", id);
-		return ret;
+		return -EINVAL;
 	}
 
 	channel->size = sizeof(*channel);
@@ -120,5 +123,6 @@ int tplg_parse_channel(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 		tplg_dbg("\t\t%s = %s\n", id, value);
 	}
 
+	tplg->channel_idx++;
 	return 0;
 }
