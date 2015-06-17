@@ -245,7 +245,6 @@ int tplg_check_routes(snd_tplg_t *tplg)
 			PARSER_TYPE_DAPM_WIDGET)) {
 			fprintf(stderr, "error: undefined sink widget/stream '%s'\n",
 				route->sink);
-			return -EINVAL;
 		}
 
 		/* validate control name */
@@ -256,7 +255,6 @@ int tplg_check_routes(snd_tplg_t *tplg)
 				route->control, PARSER_TYPE_ENUM)) {
 				fprintf(stderr, "error: Undefined mixer/enum control '%s'\n",
 					route->control);
-			return -EINVAL;
 			}
 		}
 
@@ -270,7 +268,6 @@ int tplg_check_routes(snd_tplg_t *tplg)
 			PARSER_TYPE_DAPM_WIDGET)) {
 			fprintf(stderr, "error: Undefined source widget/stream '%s'\n",
 				route->source);
-			return -EINVAL;
 		}
 	}
 
