@@ -242,8 +242,7 @@ int tplg_check_routes(snd_tplg_t *tplg)
 
 		}
 		if (!tplg_elem_lookup(&tplg->widget_list, route->sink,
-			PARSER_TYPE_DAPM_WIDGET) &&
-			!lookup_pcm_dai_stream(&tplg->pcm_list, route->sink)) {
+			PARSER_TYPE_DAPM_WIDGET)) {
 			fprintf(stderr, "error: undefined sink widget/stream '%s'\n",
 				route->sink);
 			return -EINVAL;
@@ -268,8 +267,7 @@ int tplg_check_routes(snd_tplg_t *tplg)
 
 		}
 		if (!tplg_elem_lookup(&tplg->widget_list, route->source,
-			PARSER_TYPE_DAPM_WIDGET) &&
-			!lookup_pcm_dai_stream(&tplg->pcm_list, route->source)) {
+			PARSER_TYPE_DAPM_WIDGET)) {
 			fprintf(stderr, "error: Undefined source widget/stream '%s'\n",
 				route->source);
 			return -EINVAL;
