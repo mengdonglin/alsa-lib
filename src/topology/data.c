@@ -42,7 +42,8 @@ static int tplg_parse_data_file(snd_config_t *cfg, struct tplg_elem *elem)
 
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
-		fprintf(stderr, "error: invalid data file path '%s'\n", value);
+		fprintf(stderr, "error: invalid data file path '%s'\n",
+			filename);
 		ret = -errno;
 		goto err;
 	}
@@ -251,7 +252,7 @@ int tplg_parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 		if (strcmp(id, "file") == 0) {
 			err = tplg_parse_data_file(n, elem);
 			if (err < 0) {
-				fprintf(stderr, "error: failed to parse data file");
+				fprintf(stderr, "error: failed to parse data file\n");
 				return err;
 			}
 			continue;
@@ -260,7 +261,7 @@ int tplg_parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 		if (strcmp(id, "bytes") == 0) {
 			err = tplg_parse_data_hex(n, elem, 1);
 			if (err < 0) {
-				fprintf(stderr, "error: failed to parse data bytes");
+				fprintf(stderr, "error: failed to parse data bytes\n");
 				return err;
 			}
 			continue;
@@ -269,7 +270,7 @@ int tplg_parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 		if (strcmp(id, "shorts") == 0) {
 			err = tplg_parse_data_hex(n, elem, 2);
 			if (err < 0) {
-				fprintf(stderr, "error: failed to parse data shorts");
+				fprintf(stderr, "error: failed to parse data shorts\n");
 				return err;
 			}
 			continue;
@@ -278,7 +279,7 @@ int tplg_parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 		if (strcmp(id, "words") == 0) {
 			err = tplg_parse_data_hex(n, elem, 4);
 			if (err < 0) {
-				fprintf(stderr, "error: failed to parse data words");
+				fprintf(stderr, "error: failed to parse data words\n");
 				return err;
 			}
 			continue;
