@@ -129,7 +129,7 @@ static int copy_dapm_control(struct tplg_elem *elem, struct tplg_elem *ref)
 
 	elem->size += ref->size;
 	widget->num_kcontrols++;
-	elem->compound_elem = 1;
+	ref->compound_elem = 1;
 	return 0;
 }
 
