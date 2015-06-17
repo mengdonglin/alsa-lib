@@ -243,7 +243,7 @@ int tplg_check_routes(snd_tplg_t *tplg)
 		}
 		if (!tplg_elem_lookup(&tplg->widget_list, route->sink,
 			PARSER_TYPE_DAPM_WIDGET)) {
-			fprintf(stderr, "error: undefined sink widget/stream '%s'\n",
+			fprintf(stderr, "warning: undefined sink widget/stream '%s'\n",
 				route->sink);
 		}
 
@@ -253,7 +253,7 @@ int tplg_check_routes(snd_tplg_t *tplg)
 				route->control, PARSER_TYPE_MIXER) &&
 			!tplg_elem_lookup(&tplg->enum_list,
 				route->control, PARSER_TYPE_ENUM)) {
-				fprintf(stderr, "error: Undefined mixer/enum control '%s'\n",
+				fprintf(stderr, "warning: Undefined mixer/enum control '%s'\n",
 					route->control);
 			}
 		}
@@ -266,7 +266,7 @@ int tplg_check_routes(snd_tplg_t *tplg)
 		}
 		if (!tplg_elem_lookup(&tplg->widget_list, route->source,
 			PARSER_TYPE_DAPM_WIDGET)) {
-			fprintf(stderr, "error: Undefined source widget/stream '%s'\n",
+			fprintf(stderr, "warning: Undefined source widget/stream '%s'\n",
 				route->source);
 		}
 	}
