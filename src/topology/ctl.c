@@ -424,7 +424,7 @@ int tplg_parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
 	const char *id, *val = NULL;
-	int err;
+	int err, j;
 
 	elem = tplg_elem_new_common(tplg, cfg, PARSER_TYPE_ENUM);
 	if (!elem)
@@ -438,6 +438,10 @@ int tplg_parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
 	ec->hdr.type =  SND_SOC_TPLG_TYPE_ENUM;
 	ec->size = elem->size;
 	tplg->channel_idx = 0;
+
+	/* set channel reg to default state */
+	for (j = 0; j < SND_SOC_TPLG_MAX_CHAN; j++)
+		ec->channel[j].reg = -1;
 
 	tplg_dbg(" Control Enum: %s\n", elem->id);
 
@@ -540,7 +544,7 @@ int tplg_parse_control_mixer(snd_tplg_t *tplg,
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
 	const char *id, *val = NULL;
-	int err;
+	int err, j;
 
 	elem = tplg_elem_new_common(tplg, cfg, PARSER_TYPE_MIXER);
 	if (!elem)
@@ -554,6 +558,10 @@ int tplg_parse_control_mixer(snd_tplg_t *tplg,
 	mc->hdr.type =  SND_SOC_TPLG_TYPE_MIXER;
 	mc->size = elem->size;
 	tplg->channel_idx = 0;
+
+	/* set channel reg to default state */
+	for (j = 0; j < SND_SOC_TPLG_MAX_CHAN; j++)
+		mc->channel[j].reg = -1;
 
 	tplg_dbg(" Control Mixer: %s\n", elem->id);
 
