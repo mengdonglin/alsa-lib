@@ -34,16 +34,38 @@ extern "C" {
 
 /*! \page Topology ALSA Topology Interface
  * 
- * ALSA Use Case Interface
+ * ALSA Topology Interface
  *
  */
 
 typedef struct snd_tplg snd_tplg_t;
 
+/**
+ * \brief Create a new topology parser instance.
+ * \return New topology parser instance
+ */
 snd_tplg_t *snd_tplg_new(void);
+
+/**
+ * \brief Free a topology parser instance.
+ * \param tplg Topology parser instance
+ */
 void snd_tplg_free(snd_tplg_t *tplg);
 
+/**
+ * \brief Parse and build topology text file into binary file.
+ * \param tplg Topology instance.
+ * \param infile Topology text input file to be parsed
+ * \param outfile Binary topology output file.
+ * \return Zero on sucess, otherwise a negative error code
+ */
 int snd_tplg_build(snd_tplg_t *tplg, const char *infile, const char *outfile);
+
+/**
+ * \brief Enable verbose reporting of binary file output
+ * \param tplg Topology Instance
+ * \param verbose Enable verbose output if non zero
+ */
 void snd_tplg_verbose(snd_tplg_t *tplg, int verbose);
 
 #ifdef __cplusplus
