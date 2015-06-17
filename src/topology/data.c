@@ -24,6 +24,8 @@ static int tplg_parse_data_file(snd_config_t *cfg, struct tplg_elem *elem)
 {
 	struct snd_soc_tplg_private *priv = NULL;
 	const char *value = NULL;
+	char filename[MAX_FILE];
+	char *env = getenv(ALSA_CONFIG_TPLG_VAR);
 	FILE *fp;
 	size_t size, bytes_read;
 	int ret = 0;
@@ -33,7 +35,12 @@ static int tplg_parse_data_file(snd_config_t *cfg, struct tplg_elem *elem)
 	if (snd_config_get_string(cfg, &value) < 0)
 		return -EINVAL;
 
-	fp = fopen(value, "r");
+	/* prepend alsa config directory to path */
+	snprintf(filename, sizeof(filename), "%s/%s",
+		env ? env : ALSA_TPLG_DIR, value);
+	filename[sizeof(filename)-1] = '\0';
+
+	fp = fopen(filename, "r");
 	if (fp == NULL) {
 		fprintf(stderr, "error: invalid data file path '%s'\n", value);
 		ret = -errno;
