@@ -29,6 +29,9 @@ static int copy_tlv(struct tplg_elem *elem, struct tplg_elem *ref)
 
 	/* TLV has a fixed size */
 	memcpy(&mixer_ctrl->tlv, tlv, sizeof(*tlv));
+
+	/* set size of TLV data */
+	mixer_ctrl->hdr.tlv_size = tlv->count * sizeof(uint32_t);
 	return 0;
 }
 
@@ -52,7 +55,7 @@ static int tplg_check_mixer_control(snd_tplg_t *tplg,
 		if (ref->type == PARSER_TYPE_TLV) {
 			ref->elem = tplg_elem_lookup(&tplg->tlv_list,
 						ref->id, PARSER_TYPE_TLV);
-			if(ref->elem)
+			if (ref->elem)
 				 err = copy_tlv(elem, ref->elem);
 
 		} else if (ref->type == PARSER_TYPE_DATA) {
