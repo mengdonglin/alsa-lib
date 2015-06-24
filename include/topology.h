@@ -26,13 +26,13 @@ extern "C" {
 #endif
 
 /**
- *  \defgroup Topology Interface
+ *  \defgroup topology Topology Interface
  *  The topology interface.
  *  See \ref Topology page for more details.
  *  \{
  */
 
-/*! \page Topology ALSA Topology Interface
+/*! \page topology ALSA Topology Interface
  * 
  * ALSA Topology Interface
  *
