@@ -218,6 +218,7 @@ static int tplg_parse_tlv_dbscale(snd_config_t *cfg, struct tplg_elem *elem)
 
 	elem->tlv = tplg_tlv;
 	tplg_tlv->numid = SNDRV_CTL_TLVT_DB_SCALE;
+	tplg_tlv->count = 8;
 	tplg_tlv->size = sizeof(*tplg_tlv);
 
 	snd_config_for_each(i, next, cfg) {
@@ -246,9 +247,6 @@ static int tplg_parse_tlv_dbscale(snd_config_t *cfg, struct tplg_elem *elem)
 		else
 			fprintf(stderr, "error: unknown key %s\n", id);
 	}
-
-	/* SND_SOC_TPLG_TLV_SIZE must be > 3 */
-	tplg_tlv->count = 3;
 
 	return 0;
 }
