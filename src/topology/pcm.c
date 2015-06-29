@@ -96,7 +96,7 @@ static void copy_pcm_config(const char *id,
 }
 
 /* check referenced config and caps for a pcm */
-static int tplg_check_pcm_cfg_caps(snd_tplg_t *tplg, struct tplg_elem *elem)
+static int tplg_build_pcm_cfg_caps(snd_tplg_t *tplg, struct tplg_elem *elem)
 {
 	struct tplg_elem *ref_elem = NULL;
 	struct snd_soc_tplg_pcm_cfg_caps *capconf;
@@ -141,7 +141,7 @@ static int tplg_check_pcm_cfg_caps(snd_tplg_t *tplg, struct tplg_elem *elem)
 	return 0;
 }
 
-int tplg_check_pcm_dai(snd_tplg_t *tplg, unsigned int type)
+int tplg_build_pcm_dai(snd_tplg_t *tplg, unsigned int type)
 {
 	struct list_head *base, *pos, *npos;
 	struct tplg_elem *elem;
@@ -169,7 +169,7 @@ int tplg_check_pcm_dai(snd_tplg_t *tplg, unsigned int type)
 			return -EINVAL;
 		}
 
-		err = tplg_check_pcm_cfg_caps(tplg, elem);
+		err = tplg_build_pcm_cfg_caps(tplg, elem);
 		if (err < 0)
 			return err;			
 	}

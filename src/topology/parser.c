@@ -229,31 +229,31 @@ err:
 	return ret;
 }
 
-static int tplg_check_integ(snd_tplg_t *tplg)
+static int tplg_build_integ(snd_tplg_t *tplg)
 {
 	int err;
 
-	err = tplg_check_controls(tplg);
+	err = tplg_build_controls(tplg);
 	if (err <  0)
 		return err;
 
-	err = tplg_check_widgets(tplg);
+	err = tplg_build_widgets(tplg);
 	if (err <  0)
 		return err;
 
-	err = tplg_check_pcm_dai(tplg, PARSER_TYPE_PCM);
+	err = tplg_build_pcm_dai(tplg, PARSER_TYPE_PCM);
 	if (err <  0)
 		return err;
 
-	err = tplg_check_pcm_dai(tplg, PARSER_TYPE_BE);
+	err = tplg_build_pcm_dai(tplg, PARSER_TYPE_BE);
 	if (err <  0)
 		return err;
 
-	err = tplg_check_pcm_dai(tplg, PARSER_TYPE_CC);
+	err = tplg_build_pcm_dai(tplg, PARSER_TYPE_CC);
 	if (err <  0)
 		return err;
 
-	err = tplg_check_routes(tplg);
+	err = tplg_build_routes(tplg);
 	if (err <  0)
 		return err;
 
@@ -289,7 +289,7 @@ int snd_tplg_build(snd_tplg_t *tplg, const char *infile, const char *outfile)
 		goto out;
 	}
 
-	err = tplg_check_integ(tplg);
+	err = tplg_build_integ(tplg);
 	if (err < 0) {
 		fprintf(stderr, "error: failed to check topology integrity\n");
 		goto out;

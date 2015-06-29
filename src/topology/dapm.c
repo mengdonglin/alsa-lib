@@ -134,7 +134,7 @@ static int copy_dapm_control(struct tplg_elem *elem, struct tplg_elem *ref)
 }
 
 /* check referenced controls for a widget */
-static int tplg_check_widget(snd_tplg_t *tplg,
+static int tplg_build_widget(snd_tplg_t *tplg,
 	struct tplg_elem *elem)
 {
 	struct tplg_ref *ref;
@@ -189,7 +189,7 @@ static int tplg_check_widget(snd_tplg_t *tplg,
 	return 0;
 }
 
-int tplg_check_widgets(snd_tplg_t *tplg)
+int tplg_build_widgets(snd_tplg_t *tplg)
 {
 
 	struct list_head *base, *pos, *npos;
@@ -206,7 +206,7 @@ int tplg_check_widgets(snd_tplg_t *tplg)
 			return -EINVAL;
 		}
 
-		err = tplg_check_widget(tplg, elem);
+		err = tplg_build_widget(tplg, elem);
 		if (err < 0)
 			return err;
 	}
@@ -214,7 +214,7 @@ int tplg_check_widgets(snd_tplg_t *tplg)
 	return 0;
 }
 
-int tplg_check_routes(snd_tplg_t *tplg)
+int tplg_build_routes(snd_tplg_t *tplg)
 {
 	struct list_head *base, *pos, *npos;
 	struct tplg_elem *elem;

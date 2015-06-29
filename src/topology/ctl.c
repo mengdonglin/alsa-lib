@@ -36,7 +36,7 @@ static int copy_tlv(struct tplg_elem *elem, struct tplg_elem *ref)
 }
 
 /* check referenced TLV for a mixer control */
-static int tplg_check_mixer_control(snd_tplg_t *tplg,
+static int tplg_build_mixer_control(snd_tplg_t *tplg,
 				struct tplg_elem *elem)
 {
 	struct tplg_ref *ref;
@@ -85,7 +85,7 @@ static void copy_enum_texts(struct tplg_elem *enum_elem,
 }
 
 /* check referenced text for a enum control */
-static int tplg_check_enum_control(snd_tplg_t *tplg,
+static int tplg_build_enum_control(snd_tplg_t *tplg,
 				struct tplg_elem *elem)
 {
 	struct tplg_ref *ref;
@@ -123,7 +123,7 @@ static int tplg_check_enum_control(snd_tplg_t *tplg,
 }
 
 /* check referenced private data for a byte control */
-static int tplg_check_bytes_control(snd_tplg_t *tplg, struct tplg_elem *elem)
+static int tplg_build_bytes_control(snd_tplg_t *tplg, struct tplg_elem *elem)
 {
 	struct tplg_ref *ref;
 	struct list_head *base, *pos, *npos;
@@ -153,7 +153,7 @@ static int tplg_check_bytes_control(snd_tplg_t *tplg, struct tplg_elem *elem)
 	return 0;
 }
 
-int tplg_check_controls(snd_tplg_t *tplg)
+int tplg_build_controls(snd_tplg_t *tplg)
 {
 	struct list_head *base, *pos, *npos;
 	struct tplg_elem *elem;
@@ -163,7 +163,7 @@ int tplg_check_controls(snd_tplg_t *tplg)
 	list_for_each_safe(pos, npos, base) {
 
 		elem = list_entry(pos, struct tplg_elem, list);
-		err = tplg_check_mixer_control(tplg, elem);
+		err = tplg_build_mixer_control(tplg, elem);
 		if (err < 0)
 			return err;
 	}
@@ -172,7 +172,7 @@ int tplg_check_controls(snd_tplg_t *tplg)
 	list_for_each_safe(pos, npos, base) {
 
 		elem = list_entry(pos, struct tplg_elem, list);
-		err = tplg_check_enum_control(tplg, elem);
+		err = tplg_build_enum_control(tplg, elem);
 		if (err < 0)
 			return err;
 	}
@@ -181,7 +181,7 @@ int tplg_check_controls(snd_tplg_t *tplg)
 	list_for_each_safe(pos, npos, base) {
 
 		elem = list_entry(pos, struct tplg_elem, list);
-		err = tplg_check_bytes_control(tplg, elem);
+		err = tplg_build_bytes_control(tplg, elem);
 		if (err < 0)
 			return err;
 	}

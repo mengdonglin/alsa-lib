@@ -194,10 +194,10 @@ int tplg_parse_be(snd_tplg_t *tplg,
 int tplg_parse_cc(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
 
-int tplg_check_controls(snd_tplg_t *tplg);
-int tplg_check_widgets(snd_tplg_t *tplg);
-int tplg_check_routes(snd_tplg_t *tplg);
-int tplg_check_pcm_dai(snd_tplg_t *tplg, unsigned int type);
+int tplg_build_controls(snd_tplg_t *tplg);
+int tplg_build_widgets(snd_tplg_t *tplg);
+int tplg_build_routes(snd_tplg_t *tplg);
+int tplg_build_pcm_dai(snd_tplg_t *tplg, unsigned int type);
 
 int tplg_copy_data(struct tplg_elem *elem, struct tplg_elem *ref);
 
