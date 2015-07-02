@@ -58,7 +58,7 @@ static int write_block_header(snd_tplg_t *tplg, unsigned int type,
 
 	/* make sure file offset is aligned with the calculated HDR offset */
 	if ((unsigned int)offset != tplg->next_hdr_pos) {
-		fprintf(stderr, "error: New header is at offset 0x%x but file"
+		SNDERR("error: New header is at offset 0x%x but file"
 			" offset 0x%x is %s by %d bytes\n",
 			tplg->next_hdr_pos, offset,
 			(unsigned int)offset > tplg->next_hdr_pos ? "ahead" : "behind",
@@ -74,7 +74,7 @@ static int write_block_header(snd_tplg_t *tplg, unsigned int type,
 
 	bytes = write(tplg->out_fd, &hdr, sizeof(hdr));
 	if (bytes != sizeof(hdr)) {
-		fprintf(stderr, "error: can't write section header %lu\n",
+		SNDERR("error: can't write section header %lu\n",
 			(long unsigned int)bytes);
 		return bytes;
 	}
@@ -97,7 +97,7 @@ static int write_elem_block(snd_tplg_t *tplg,
 	ret = write_block_header(tplg, tplg_type, 0,
 		SND_SOC_TPLG_ABI_VERSION, 0, size, count);
 	if (ret < 0) {
-		fprintf(stderr, "error: failed to write %s block %d\n",
+		SNDERR("error: failed to write %s block %d\n",
 			obj_name, ret);
 		return ret;
 	}
@@ -120,7 +120,7 @@ static int write_elem_block(snd_tplg_t *tplg,
 
 		count = write(tplg->out_fd, elem->obj, elem->size);
 		if (count < 0) {
-			fprintf(stderr, "error: failed to write %s %d\n",
+			SNDERR("error: failed to write %s %d\n",
 				obj_name, ret);
 			return ret;
 		}
@@ -130,7 +130,7 @@ static int write_elem_block(snd_tplg_t *tplg,
 
 	/* make sure we have written the correct size */
 	if (wsize != size) {
-		fprintf(stderr, "error: size mismatch. Expected %d wrote %d\n",
+		SNDERR("error: size mismatch. Expected %d wrote %d\n",
 			size, wsize);
 		return -EIO;
 	}
@@ -211,7 +211,7 @@ int tplg_write_data(snd_tplg_t *tplg)
 	ret = write_block(tplg, &tplg->mixer_list,
 		PARSER_TYPE_MIXER);
 	if (ret < 0) {
-		fprintf(stderr, "failed to write control elems %d\n", ret);
+		SNDERR("failed to write control elems %d\n", ret);
 		return ret;
 	}
 
@@ -219,7 +219,7 @@ int tplg_write_data(snd_tplg_t *tplg)
 	ret = write_block(tplg, &tplg->enum_list,
 		PARSER_TYPE_ENUM);
 	if (ret < 0) {
-		fprintf(stderr, "failed to write control elems %d\n", ret);
+		SNDERR("failed to write control elems %d\n", ret);
 		return ret;
 	}
 
@@ -227,7 +227,7 @@ int tplg_write_data(snd_tplg_t *tplg)
 	ret = write_block(tplg, &tplg->bytes_ext_list,
 		PARSER_TYPE_BYTES);
 	if (ret < 0) {
-		fprintf(stderr, "failed to write control elems %d\n", ret);
+		SNDERR("failed to write control elems %d\n", ret);
 		return ret;
 	}
 
@@ -235,7 +235,7 @@ int tplg_write_data(snd_tplg_t *tplg)
 	ret = write_block(tplg, &tplg->widget_list,
 		PARSER_TYPE_DAPM_WIDGET);
 	if (ret < 0) {
-		fprintf(stderr, "failed to write widget elems %d\n", ret);
+		SNDERR("failed to write widget elems %d\n", ret);
 		return ret;
 	}
 
@@ -243,7 +243,7 @@ int tplg_write_data(snd_tplg_t *tplg)
 	ret = write_block(tplg, &tplg->pcm_list,
 		PARSER_TYPE_PCM);
 	if (ret < 0) {
-		fprintf(stderr, "failed to write pcm elems %d\n", ret);
+		SNDERR("failed to write pcm elems %d\n", ret);
 		return ret;
 	}
 
@@ -251,7 +251,7 @@ int tplg_write_data(snd_tplg_t *tplg)
 	ret = write_block(tplg, &tplg->be_list,
 		PARSER_TYPE_BE);
 	if (ret < 0) {
-		fprintf(stderr, "failed to write be elems %d\n", ret);
+		SNDERR("failed to write be elems %d\n", ret);
 		return ret;
 	}
 
@@ -259,7 +259,7 @@ int tplg_write_data(snd_tplg_t *tplg)
 	ret = write_block(tplg, &tplg->cc_list,
 		PARSER_TYPE_CC);
 	if (ret < 0) {
-		fprintf(stderr, "failed to write cc elems %d\n", ret);
+		SNDERR("failed to write cc elems %d\n", ret);
 		return ret;
 	}
 
@@ -267,7 +267,7 @@ int tplg_write_data(snd_tplg_t *tplg)
 	ret = write_block(tplg, &tplg->route_list,
 		PARSER_TYPE_DAPM_GRAPH);
 	if (ret < 0) {
-		fprintf(stderr, "failed to write graph elems %d\n", ret);
+		SNDERR("failed to write graph elems %d\n", ret);
 		return ret;
 	}
 

@@ -88,7 +88,7 @@ int tplg_parse_text(snd_tplg_t *tplg, snd_config_t *cfg,
 		if (strcmp(id, "values") == 0) {
 			err = parse_text_values(n, elem);
 			if (err < 0) {
-				fprintf(stderr, "error: failed to parse text values");
+				SNDERR("error: failed to parse text values");
 				return err;
 			}
 			continue;

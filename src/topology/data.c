@@ -42,7 +42,7 @@ static int tplg_parse_data_file(snd_config_t *cfg, struct tplg_elem *elem)
 
 	fp = fopen(filename, "r");
 	if (fp == NULL) {
-		fprintf(stderr, "error: invalid data file path '%s'\n",
+		SNDERR("error: invalid data file path '%s'\n",
 			filename);
 		ret = -errno;
 		goto err;
@@ -52,12 +52,12 @@ static int tplg_parse_data_file(snd_config_t *cfg, struct tplg_elem *elem)
 	size = ftell(fp);
 	fseek(fp, 0L, SEEK_SET);
 	if (size <= 0) {
-		fprintf(stderr, "error: invalid data file size %zu\n", size);
+		SNDERR("error: invalid data file size %zu\n", size);
 		ret = -EINVAL;
 		goto err;
 	}
 	if (size > TPLG_MAX_PRIV_SIZE) {
-		fprintf(stderr, "error: data file too big %zu\n", size);
+		SNDERR("error: data file too big %zu\n", size);
 		ret = -EINVAL;
 		goto err;
 	}
@@ -198,7 +198,7 @@ static int tplg_parse_data_hex(snd_config_t *cfg, struct tplg_elem *elem,
 	priv = elem->data;
 
 	if (esize > TPLG_MAX_PRIV_SIZE) {
-		fprintf(stderr, "error: data too big %d\n", esize);
+		SNDERR("error: data too big %d\n", esize);
 		return -EINVAL;
 	}
 
@@ -262,7 +262,7 @@ int tplg_parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 		if (strcmp(id, "file") == 0) {
 			err = tplg_parse_data_file(n, elem);
 			if (err < 0) {
-				fprintf(stderr, "error: failed to parse data file\n");
+				SNDERR("error: failed to parse data file\n");
 				return err;
 			}
 			continue;
@@ -271,7 +271,7 @@ int tplg_parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 		if (strcmp(id, "bytes") == 0) {
 			err = tplg_parse_data_hex(n, elem, 1);
 			if (err < 0) {
-				fprintf(stderr, "error: failed to parse data bytes\n");
+				SNDERR("error: failed to parse data bytes\n");
 				return err;
 			}
 			continue;
@@ -280,7 +280,7 @@ int tplg_parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 		if (strcmp(id, "shorts") == 0) {
 			err = tplg_parse_data_hex(n, elem, 2);
 			if (err < 0) {
-				fprintf(stderr, "error: failed to parse data shorts\n");
+				SNDERR("error: failed to parse data shorts\n");
 				return err;
 			}
 			continue;
@@ -289,7 +289,7 @@ int tplg_parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 		if (strcmp(id, "words") == 0) {
 			err = tplg_parse_data_hex(n, elem, 4);
 			if (err < 0) {
-				fprintf(stderr, "error: failed to parse data words\n");
+				SNDERR("error: failed to parse data words\n");
 				return err;
 			}
 			continue;
@@ -346,7 +346,7 @@ int tplg_copy_data(struct tplg_elem *elem, struct tplg_elem *ref)
 		break;
 
 	default:
-		fprintf(stderr, "elem '%s': type %d shall not have private data\n",
+		SNDERR("elem '%s': type %d shall not have private data\n",
 			elem->id, elem->type);
 		return -EINVAL;
 	}

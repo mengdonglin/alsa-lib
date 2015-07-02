@@ -176,7 +176,7 @@ static int tplg_build_widget(snd_tplg_t *tplg,
 		}
 
 		if (!ref->elem) {
-			fprintf(stderr, "error: cannot find control '%s'"
+			SNDERR("error: cannot find control '%s'"
 				" referenced by widget '%s'\n",
 				ref->id, elem->id);
 			return -EINVAL;
@@ -201,7 +201,7 @@ int tplg_build_widgets(snd_tplg_t *tplg)
 
 		elem = list_entry(pos, struct tplg_elem, list);
 		if (!elem->widget || elem->type != PARSER_TYPE_DAPM_WIDGET) {
-			fprintf(stderr, "error: invalid widget '%s'\n",
+			SNDERR("error: invalid widget '%s'\n",
 				elem->id);
 			return -EINVAL;
 		}
@@ -226,7 +226,7 @@ int tplg_build_routes(snd_tplg_t *tplg)
 		elem = list_entry(pos, struct tplg_elem, list);
 
 		if (!elem->route || elem->type != PARSER_TYPE_DAPM_GRAPH) {
-			fprintf(stderr, "error: invalid route '%s'\n",
+			SNDERR("error: invalid route '%s'\n",
 				elem->id);
 			return -EINVAL;
 		}
@@ -237,13 +237,13 @@ int tplg_build_routes(snd_tplg_t *tplg)
 
 		/* validate sink */
 		if (strlen(route->sink) <= 0) {
-			fprintf(stderr, "error: no sink\n");
+			SNDERR("error: no sink\n");
 			return -EINVAL;
 
 		}
 		if (!tplg_elem_lookup(&tplg->widget_list, route->sink,
 			PARSER_TYPE_DAPM_WIDGET)) {
-			fprintf(stderr, "warning: undefined sink widget/stream '%s'\n",
+			SNDERR("warning: undefined sink widget/stream '%s'\n",
 				route->sink);
 		}
 
@@ -253,20 +253,20 @@ int tplg_build_routes(snd_tplg_t *tplg)
 				route->control, PARSER_TYPE_MIXER) &&
 			!tplg_elem_lookup(&tplg->enum_list,
 				route->control, PARSER_TYPE_ENUM)) {
-				fprintf(stderr, "warning: Undefined mixer/enum control '%s'\n",
+				SNDERR("warning: Undefined mixer/enum control '%s'\n",
 					route->control);
 			}
 		}
 
 		/* validate source */
 		if (strlen(route->source) <= 0) {
-			fprintf(stderr, "error: no source\n");
+			SNDERR("error: no source\n");
 			return -EINVAL;
 
 		}
 		if (!tplg_elem_lookup(&tplg->widget_list, route->source,
 			PARSER_TYPE_DAPM_WIDGET)) {
-			fprintf(stderr, "warning: Undefined source widget/stream '%s'\n",
+			SNDERR("warning: Undefined source widget/stream '%s'\n",
 				route->source);
 		}
 	}
@@ -289,7 +289,7 @@ static int tplg_parse_line(const char *text,
 
 	len = strlen(buf);
 	if (len <= 2) {
-		fprintf(stderr, "error: invalid route \"%s\"\n", buf);
+		SNDERR("error: invalid route \"%s\"\n", buf);
 		return -EINVAL;
 	}
 
@@ -298,7 +298,7 @@ static int tplg_parse_line(const char *text,
 		if (buf[i] == ',')
 			goto second;
 	}
-	fprintf(stderr, "error: invalid route \"%s\"\n", buf);
+	SNDERR("error: invalid route \"%s\"\n", buf);
 	return -EINVAL;
 
 second:
@@ -312,7 +312,7 @@ second:
 			goto done;
 	}
 
-	fprintf(stderr, "error: invalid route \"%s\"\n", buf);
+	SNDERR("error: invalid route \"%s\"\n", buf);
 	return -EINVAL;
 
 done:
@@ -376,7 +376,7 @@ int tplg_parse_dapm_graph(snd_tplg_t *tplg, snd_config_t *cfg,
 	const char *graph_id;
 
 	if (snd_config_get_type(cfg) != SND_CONFIG_TYPE_COMPOUND) {
-		fprintf(stderr, "error: compound is expected for dapm graph definition\n");
+		SNDERR("error: compound is expected for dapm graph definition\n");
 		return -EINVAL;
 	}
 
@@ -393,7 +393,7 @@ int tplg_parse_dapm_graph(snd_tplg_t *tplg, snd_config_t *cfg,
 		if (strcmp(id, "lines") == 0) {
 			err = tplg_parse_routes(tplg, n);
 			if (err < 0) {
-				fprintf(stderr, "error: failed to parse dapm graph %s\n",
+				SNDERR("error: failed to parse dapm graph %s\n",
 					graph_id);
 				return err;
 			}
@@ -466,7 +466,7 @@ int tplg_parse_dapm_widget(snd_tplg_t *tplg,
 
 			widget_type = lookup_widget(val);
 			if (widget_type < 0){
-				fprintf(stderr, "Widget '%s': Unsupported widget type %s\n",
+				SNDERR("Widget '%s': Unsupported widget type %s\n",
 					elem->id, val);
 				return -EINVAL;
 			}

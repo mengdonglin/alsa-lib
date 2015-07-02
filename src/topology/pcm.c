@@ -135,7 +135,7 @@ int tplg_build_pcm_dai(snd_tplg_t *tplg, unsigned int type)
 
 		elem = list_entry(pos, struct tplg_elem, list);
 		if (elem->type != type) {
-			fprintf(stderr, "error: invalid elem '%s'\n", elem->id);
+			SNDERR("error: invalid elem '%s'\n", elem->id);
 			return -EINVAL;
 		}
 
@@ -195,7 +195,7 @@ static int tplg_parse_stream_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 		if (strcmp(id, "format") == 0) {
 			format = snd_pcm_format_value(val);
 			if (format == SND_PCM_FORMAT_UNKNOWN) {
-				fprintf(stderr, "error: unsupported stream format %s\n",
+				SNDERR("error: unsupported stream format %s\n",
 					val);
 				return -EINVAL;
 			}
@@ -292,7 +292,7 @@ static int split_format(struct snd_soc_tplg_stream_caps *caps, char *str)
 	while ((s != NULL) && (i < SND_SOC_TPLG_MAX_FORMATS)) {
 		format = snd_pcm_format_value(s);
 		if (format == SND_PCM_FORMAT_UNKNOWN) {
-			fprintf(stderr, "error: unsupported stream format %s\n", s);
+			SNDERR("error: unsupported stream format %s\n", s);
 			return -EINVAL;
 		}
 

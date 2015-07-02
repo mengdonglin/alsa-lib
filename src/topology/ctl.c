@@ -65,7 +65,7 @@ static int tplg_build_mixer_control(snd_tplg_t *tplg,
 		}
 
 		if (!ref->elem) {
-			fprintf(stderr, "error: cannot find '%s' referenced by"
+			SNDERR("error: cannot find '%s' referenced by"
 				" control '%s'\n", ref->id, elem->id);
 			return -EINVAL;
 		} else if (err < 0)
@@ -112,7 +112,7 @@ static int tplg_build_enum_control(snd_tplg_t *tplg,
 			err = tplg_copy_data(elem, ref->elem);
 		}
 		if (!ref->elem) {
-			fprintf(stderr, "error: cannot find '%s' referenced by"
+			SNDERR("error: cannot find '%s' referenced by"
 				" control '%s'\n", ref->id, elem->id);
 			return -EINVAL;
 		} else if (err < 0)
@@ -140,7 +140,7 @@ static int tplg_build_bytes_control(snd_tplg_t *tplg, struct tplg_elem *elem)
 		ref->elem = tplg_elem_lookup(&tplg->pdata_list,
 			ref->id, PARSER_TYPE_DATA);
 		if (!ref->elem) {
-			fprintf(stderr, "error: cannot find data '%s'"
+			SNDERR("error: cannot find data '%s'"
 				" referenced by control '%s'\n",
 				ref->id, elem->id);
 			return -EINVAL;
@@ -227,7 +227,7 @@ static int tplg_parse_tlv_dbscale(snd_config_t *cfg, struct tplg_elem *elem)
 
 		/* get ID */
 		if (snd_config_get_id(n, &id) < 0) {
-			fprintf(stderr, "error: cant get ID\n");
+			SNDERR("error: cant get ID\n");
 			return -EINVAL;
 		}
 
@@ -245,7 +245,7 @@ static int tplg_parse_tlv_dbscale(snd_config_t *cfg, struct tplg_elem *elem)
 		else if (strcmp(id, "mute") == 0)
 			data[2] = atoi(value);
 		else
-			fprintf(stderr, "error: unknown key %s\n", id);
+			SNDERR("error: unknown key %s\n", id);
 	}
 
 	return 0;
@@ -284,7 +284,7 @@ int tplg_parse_tlv(snd_tplg_t *tplg, snd_config_t *cfg,
 		if (strcmp(id, "scale") == 0) {
 			err = tplg_parse_tlv_dbscale(n, elem);
 			if (err < 0) {
-				fprintf(stderr, "error: failed to DBScale");
+				SNDERR("error: failed to DBScale");
 				return err;
 			}
 			continue;
@@ -492,7 +492,7 @@ int tplg_parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
 
 		if (strcmp(id, "channel") == 0) {
 			if (ec->num_channels >= SND_SOC_TPLG_MAX_CHAN) {
-				fprintf(stderr, "error: too many channels %s\n",
+				SNDERR("error: too many channels %s\n",
 					elem->id);
 				return -EINVAL;
 			}
@@ -602,7 +602,7 @@ int tplg_parse_control_mixer(snd_tplg_t *tplg,
 
 		if (strcmp(id, "channel") == 0) {
 			if (mc->num_channels >= SND_SOC_TPLG_MAX_CHAN) {
-				fprintf(stderr, "error: too many channels %s\n",
+				SNDERR("error: too many channels %s\n",
 					elem->id);
 				return -EINVAL;
 			}

@@ -35,7 +35,7 @@ int tplg_parse_compound(snd_tplg_t *tplg, snd_config_t *cfg,
 		return -EINVAL;
 
 	if (snd_config_get_type(cfg) != SND_CONFIG_TYPE_COMPOUND) {
-		fprintf(stderr, "error: compound type expected for %s", id);
+		SNDERR("error: compound type expected for %s", id);
 		return -EINVAL;
 	}
 
@@ -44,7 +44,7 @@ int tplg_parse_compound(snd_tplg_t *tplg, snd_config_t *cfg,
 		n = snd_config_iterator_entry(i);
 
 		if (snd_config_get_type(cfg) != SND_CONFIG_TYPE_COMPOUND) {
-			fprintf(stderr, "error: compound type expected for %s, is %d",
+			SNDERR("error: compound type expected for %s, is %d",
 				id, snd_config_get_type(cfg));
 			return -EINVAL;
 		}
@@ -65,7 +65,7 @@ static int tplg_parse_config(snd_tplg_t *tplg, snd_config_t *cfg)
 	int err;
 
 	if (snd_config_get_type(cfg) != SND_CONFIG_TYPE_COMPOUND) {
-		fprintf(stderr, "error: compound type expected at top level");
+		SNDERR("error: compound type expected at top level");
 		return -EINVAL;
 	}
 
@@ -180,7 +180,7 @@ static int tplg_parse_config(snd_tplg_t *tplg, snd_config_t *cfg)
 			continue;
 		}
 
-		fprintf(stderr, "error: unknown section %s\n", id);
+		SNDERR("error: unknown section %s\n", id);
 	}
 	return 0;
 }
@@ -194,14 +194,14 @@ static int tplg_load_config(const char *file, snd_config_t **cfg)
 
 	fp = fopen(file, "r");
 	if (fp == NULL) {
-		fprintf(stdout, "error: could not open configuration file %s",
+		SNDERR("error: could not open configuration file %s",
 			file);
 		return -errno;
 	}
 
 	ret = snd_input_stdio_attach(&in, fp, 1);
 	if (ret < 0) {
-		fprintf(stdout, "error: could not attach stdio %s", file);
+		SNDERR("error: could not attach stdio %s", file);
 		goto err;
 	}
 	ret = snd_config_top(&top);
@@ -210,7 +210,7 @@ static int tplg_load_config(const char *file, snd_config_t **cfg)
 
 	ret = snd_config_load(top, in);
 	if (ret < 0) {
-		fprintf(stdout, "error: could not load configuration file %s",
+		SNDERR("error: could not load configuration file %s",
 			file);
 		goto err_load;
 	}
@@ -271,33 +271,33 @@ int snd_tplg_build(snd_tplg_t *tplg, const char *infile, const char *outfile)
 	tplg->out_fd =
 		open(outfile, O_RDWR | O_CREAT, S_IRWXU | S_IRWXG | S_IRWXO);
 	if (tplg->out_fd < 0) {
-		fprintf(stderr, "error: failed to open %s err %d\n",
+		SNDERR("error: failed to open %s err %d\n",
 			outfile, -errno);
 		return -errno;
 	}
 
 	err = tplg_load_config(infile, &cfg);
 	if (err < 0) {
-		fprintf(stderr, "error: failed to load topology file %s\n",
+		SNDERR("error: failed to load topology file %s\n",
 			infile);
 		return err;
 	}
 
 	err = tplg_parse_config(tplg, cfg);
 	if (err < 0) {
-		fprintf(stderr, "error: failed to parse topology\n");
+		SNDERR("error: failed to parse topology\n");
 		goto out;
 	}
 
 	err = tplg_build_integ(tplg);
 	if (err < 0) {
-		fprintf(stderr, "error: failed to check topology integrity\n");
+		SNDERR("error: failed to check topology integrity\n");
 		goto out;
 	}
 
 	err = tplg_write_data(tplg);
 	if (err < 0) {
-		fprintf(stderr, "error: failed to write data %d\n", err);
+		SNDERR("error: failed to write data %d\n", err);
 		goto out;
 	}
 
