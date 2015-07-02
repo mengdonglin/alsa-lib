@@ -280,7 +280,7 @@ int snd_tplg_build(snd_tplg_t *tplg, const char *infile, const char *outfile)
 	if (err < 0) {
 		SNDERR("error: failed to load topology file %s\n",
 			infile);
-		return err;
+		goto out_close;
 	}
 
 	err = tplg_parse_config(tplg, cfg);
@@ -303,6 +303,7 @@ int snd_tplg_build(snd_tplg_t *tplg, const char *infile, const char *outfile)
 
 out:
 	snd_config_delete(cfg);
+out_close:
 	close(tplg->out_fd);
 	return err;
 }
