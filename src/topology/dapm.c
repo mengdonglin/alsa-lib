@@ -284,8 +284,7 @@ static int tplg_parse_line(const char *text,
 	unsigned int len, i;
 	const char *source = NULL, *sink = NULL, *control = NULL;
 
-	strncpy(buf, text, LINE_SIZE);
-	buf[LINE_SIZE - 1] = 0;
+	elem_copy_text(buf, text, LINE_SIZE);
 
 	len = strlen(buf);
 	if (len <= 2) {
@@ -435,8 +434,7 @@ int tplg_parse_dapm_widget(snd_tplg_t *tplg,
 	tplg_dbg(" Widget: %s\n", elem->id);
 
 	widget = elem->widget;
-	strncpy(widget->name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
-	widget->name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN - 1] = 0;
+	elem_copy_text(widget->name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
 	widget->size = elem->size;
 
 	snd_config_for_each(i, next, cfg) {

@@ -44,9 +44,8 @@ static int parse_text_values(snd_config_t *cfg, struct tplg_elem *elem)
 		if (snd_config_get_string(n, &value) < 0)
 			continue;
 
-		strncpy(&elem->texts[j][0], value,
+		elem_copy_text(&elem->texts[j][0], value,
 			SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
-		elem->texts[j][SNDRV_CTL_ELEM_ID_NAME_MAXLEN - 1] = 0;
 		tplg_dbg("\t%s\n", &elem->texts[j][0]);
 
 		j++;

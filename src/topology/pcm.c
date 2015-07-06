@@ -332,8 +332,7 @@ int tplg_parse_pcm_caps(snd_tplg_t *tplg,
 
 	sc = elem->stream_caps;
 	sc->size = elem->size;
-	strncpy(sc->name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
-	sc->name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN - 1] = 0;
+	elem_copy_text(sc->name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
 
 	tplg_dbg(" PCM Capabilities: %s\n", elem->id);
 
@@ -408,9 +407,8 @@ static int tplg_parse_pcm_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 	if (snd_config_get_string(cfg, &value) < 0)
 		return EINVAL;
 
-	strncpy(configs[*num_configs].name, value,
+	elem_copy_text(configs[*num_configs].name, value,
 		SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
-	configs[*num_configs].name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN - 1] = 0;
 
 	*num_configs += 1;
 
@@ -475,9 +473,8 @@ int tplg_parse_pcm_cap_cfg(snd_tplg_t *tplg, snd_config_t *cfg,
 			if (snd_config_get_string(n, &value) < 0)
 				continue;
 
-			strncpy(pcm_dai->capconf[stream].caps.name, value,
+			elem_copy_text(pcm_dai->capconf[stream].caps.name, value,
 				SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
-			pcm_dai->capconf[stream].caps.name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN - 1] = 0;
 
 			tplg_dbg("\t\t%s\n\t\t\t%s\n", id, value);
 			continue;
@@ -535,8 +532,7 @@ int tplg_parse_pcm(snd_tplg_t *tplg,
 
 	pcm_dai = elem->pcm;
 	pcm_dai->size = elem->size;
-	strncpy(pcm_dai->name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
-	pcm_dai->name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN - 1] = 0;
+	elem_copy_text(pcm_dai->name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
 
 	tplg_dbg(" PCM: %s\n", elem->id);
 
@@ -621,8 +617,7 @@ int tplg_parse_be(snd_tplg_t *tplg,
 
 	pcm_dai = elem->be;
 	pcm_dai->size = elem->size;
-	strncpy(pcm_dai->name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
-	pcm_dai->name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN] = 0;
+	elem_copy_text(pcm_dai->name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
 
 	tplg_dbg(" BE: %s\n", elem->id);
 

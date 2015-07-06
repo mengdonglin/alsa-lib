@@ -325,8 +325,8 @@ int tplg_parse_control_bytes(snd_tplg_t *tplg,
 
 	be = elem->bytes_ext;
 	be->size = elem->size;
-	strncpy(be->hdr.name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
-	be->hdr.type =  SND_SOC_TPLG_TYPE_BYTES;
+	elem_copy_text(be->hdr.name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+	be->hdr.type = SND_SOC_TPLG_TYPE_BYTES;
 
 	tplg_dbg(" Control Bytes: %s\n", elem->id);
 
@@ -448,9 +448,8 @@ int tplg_parse_control_enum(snd_tplg_t *tplg, snd_config_t *cfg,
 
 	/* init new mixer */
 	ec = elem->enum_ctrl;
-	strncpy(ec->hdr.name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
-	ec->hdr.name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN - 1] = 0;
-	ec->hdr.type =  SND_SOC_TPLG_TYPE_ENUM;
+	elem_copy_text(ec->hdr.name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+	ec->hdr.type = SND_SOC_TPLG_TYPE_ENUM;
 	ec->size = elem->size;
 	tplg->channel_idx = 0;
 
@@ -567,9 +566,8 @@ int tplg_parse_control_mixer(snd_tplg_t *tplg,
 
 	/* init new mixer */
 	mc = elem->mixer_ctrl;
-	strncpy(mc->hdr.name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
-	mc->hdr.name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN - 1] = 0;
-	mc->hdr.type =  SND_SOC_TPLG_TYPE_MIXER;
+	elem_copy_text(mc->hdr.name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+	mc->hdr.type = SND_SOC_TPLG_TYPE_MIXER;
 	mc->size = elem->size;
 	tplg->channel_idx = 0;
 
