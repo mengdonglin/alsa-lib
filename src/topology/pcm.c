@@ -50,7 +50,7 @@ static void copy_pcm_caps(const char *id, struct snd_soc_tplg_stream_caps *caps,
 	tplg_dbg("Copy pcm caps (%ld bytes) from '%s' to '%s' \n",
 		sizeof(*caps), ref_elem->id, id);
 
-	memcpy((void*)caps, ref_caps, sizeof(*caps));
+	*caps =  *ref_caps;
 }
 
 /* copy referenced config to the pcm */
@@ -62,7 +62,7 @@ static void copy_pcm_config(const char *id,
 	tplg_dbg("Copy pcm config (%ld bytes) from '%s' to '%s' \n",
 		sizeof(*cfg), ref_elem->id, id);
 
-	memcpy((void*)cfg, ref_cfg, sizeof(*cfg));
+	*cfg = *ref_cfg;
 }
 
 /* check referenced config and caps for a pcm */

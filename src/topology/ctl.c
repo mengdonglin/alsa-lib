@@ -28,7 +28,7 @@ static int copy_tlv(struct tplg_elem *elem, struct tplg_elem *ref)
 	tplg_dbg("TLV '%s' used by '%s\n", ref->id, elem->id);
 
 	/* TLV has a fixed size */
-	memcpy(&mixer_ctrl->tlv, tlv, sizeof(*tlv));
+	mixer_ctrl->tlv = *tlv;
 
 	/* set size of TLV data */
 	mixer_ctrl->hdr.tlv_size = tlv->count * sizeof(uint32_t);
