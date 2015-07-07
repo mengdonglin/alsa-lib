@@ -40,13 +40,13 @@ static int tplg_build_mixer_control(snd_tplg_t *tplg,
 				struct tplg_elem *elem)
 {
 	struct tplg_ref *ref;
-	struct list_head *base, *pos, *npos;
+	struct list_head *base, *pos;
 	int err = 0;
 
 	base = &elem->ref_list;
 
 	/* for each ref in this control elem */
-	list_for_each_safe(pos, npos, base) {
+	list_for_each(pos, base) {
 
 		ref = list_entry(pos, struct tplg_ref, list);
 		if (ref->id == NULL || ref->elem)
@@ -89,12 +89,12 @@ static int tplg_build_enum_control(snd_tplg_t *tplg,
 				struct tplg_elem *elem)
 {
 	struct tplg_ref *ref;
-	struct list_head *base, *pos, *npos;
+	struct list_head *base, *pos;
 	int err = 0;
 
 	base = &elem->ref_list;
 
-	list_for_each_safe(pos, npos, base) {
+	list_for_each(pos, base) {
 
 		ref = list_entry(pos, struct tplg_ref, list);
 		if (ref->id == NULL || ref->elem)
@@ -126,11 +126,11 @@ static int tplg_build_enum_control(snd_tplg_t *tplg,
 static int tplg_build_bytes_control(snd_tplg_t *tplg, struct tplg_elem *elem)
 {
 	struct tplg_ref *ref;
-	struct list_head *base, *pos, *npos;
+	struct list_head *base, *pos;
 
 	base = &elem->ref_list;
 
-	list_for_each_safe(pos, npos, base) {
+	list_for_each(pos, base) {
 
 		ref = list_entry(pos, struct tplg_ref, list);
 		if (ref->id == NULL || ref->elem)
@@ -155,12 +155,12 @@ static int tplg_build_bytes_control(snd_tplg_t *tplg, struct tplg_elem *elem)
 
 int tplg_build_controls(snd_tplg_t *tplg)
 {
-	struct list_head *base, *pos, *npos;
+	struct list_head *base, *pos;
 	struct tplg_elem *elem;
 	int err = 0;
 
 	base = &tplg->mixer_list;
-	list_for_each_safe(pos, npos, base) {
+	list_for_each(pos, base) {
 
 		elem = list_entry(pos, struct tplg_elem, list);
 		err = tplg_build_mixer_control(tplg, elem);
@@ -169,7 +169,7 @@ int tplg_build_controls(snd_tplg_t *tplg)
 	}
 
 	base = &tplg->enum_list;
-	list_for_each_safe(pos, npos, base) {
+	list_for_each(pos, base) {
 
 		elem = list_entry(pos, struct tplg_elem, list);
 		err = tplg_build_enum_control(tplg, elem);
@@ -178,7 +178,7 @@ int tplg_build_controls(snd_tplg_t *tplg)
 	}
 
 	base = &tplg->bytes_ext_list;
-	list_for_each_safe(pos, npos, base) {
+	list_for_each(pos, base) {
 
 		elem = list_entry(pos, struct tplg_elem, list);
 		err = tplg_build_bytes_control(tplg, elem);

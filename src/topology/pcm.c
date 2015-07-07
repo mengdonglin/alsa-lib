@@ -21,11 +21,11 @@
 
 struct tplg_elem *lookup_pcm_dai_stream(struct list_head *base, const char* id)
 {
-	struct list_head *pos, *npos;
+	struct list_head *pos;
 	struct tplg_elem *elem;
 	struct snd_soc_tplg_pcm_dai *pcm_dai;
 
-	list_for_each_safe(pos, npos, base) {
+	list_for_each(pos, base) {
 
 		elem = list_entry(pos, struct tplg_elem, list);
 		if (elem->type != PARSER_TYPE_PCM)
@@ -113,7 +113,7 @@ static int tplg_build_pcm_cfg_caps(snd_tplg_t *tplg, struct tplg_elem *elem)
 
 int tplg_build_pcm_dai(snd_tplg_t *tplg, unsigned int type)
 {
-	struct list_head *base, *pos, *npos;
+	struct list_head *base, *pos;
 	struct tplg_elem *elem;
 	int err = 0;
 
@@ -131,7 +131,7 @@ int tplg_build_pcm_dai(snd_tplg_t *tplg, unsigned int type)
 		return -EINVAL;
 	}
 
-	list_for_each_safe(pos, npos, base) {
+	list_for_each(pos, base) {
 
 		elem = list_entry(pos, struct tplg_elem, list);
 		if (elem->type != type) {

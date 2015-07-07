@@ -87,10 +87,10 @@ void tplg_elem_free_list(struct list_head *base)
 struct tplg_elem *tplg_elem_lookup(struct list_head *base, const char* id,
 	unsigned int type)
 {
-	struct list_head *pos, *npos;
+	struct list_head *pos;
 	struct tplg_elem *elem;
 
-	list_for_each_safe(pos, npos, base) {
+	list_for_each(pos, base) {
 
 		elem = list_entry(pos, struct tplg_elem, list);
 

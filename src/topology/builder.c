@@ -85,12 +85,12 @@ static int write_block_header(snd_tplg_t *tplg, unsigned int type,
 static int write_elem_block(snd_tplg_t *tplg,
 	struct list_head *base, int size, int tplg_type, const char *obj_name)
 {
-	struct list_head *pos, *npos;
+	struct list_head *pos;
 	struct tplg_elem *elem;
 	int ret, wsize = 0, count = 0;
 
 	/* count number of elements */
-	list_for_each_safe(pos, npos, base)
+	list_for_each(pos, base)
 		count++;
 
 	/* write the header for this block */
@@ -103,7 +103,7 @@ static int write_elem_block(snd_tplg_t *tplg,
 	}
 
 	/* write each elem to block */
-	list_for_each_safe(pos, npos, base) {
+	list_for_each(pos, base) {
 
 		elem = list_entry(pos, struct tplg_elem, list);
 
@@ -140,11 +140,11 @@ static int write_elem_block(snd_tplg_t *tplg,
 
 static int calc_block_size(struct list_head *base)
 {
-	struct list_head *pos, *npos;
+	struct list_head *pos;
 	struct tplg_elem *elem;
 	int size = 0;
 
-	list_for_each_safe(pos, npos, base) {
+	list_for_each(pos, base) {
 
 		elem = list_entry(pos, struct tplg_elem, list);
 

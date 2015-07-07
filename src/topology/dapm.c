@@ -138,13 +138,13 @@ static int tplg_build_widget(snd_tplg_t *tplg,
 	struct tplg_elem *elem)
 {
 	struct tplg_ref *ref;
-	struct list_head *base, *pos, *npos;
+	struct list_head *base, *pos;
 	int err = 0;
 
 	base = &elem->ref_list;
 
 	/* for each ref in this control elem */
-	list_for_each_safe(pos, npos, base) {
+	list_for_each(pos, base) {
 
 		ref = list_entry(pos, struct tplg_ref, list);
 		if (ref->id == NULL || ref->elem)
@@ -192,12 +192,12 @@ static int tplg_build_widget(snd_tplg_t *tplg,
 int tplg_build_widgets(snd_tplg_t *tplg)
 {
 
-	struct list_head *base, *pos, *npos;
+	struct list_head *base, *pos;
 	struct tplg_elem *elem;
 	int err;
 
 	base = &tplg->widget_list;
-	list_for_each_safe(pos, npos, base) {
+	list_for_each(pos, base) {
 
 		elem = list_entry(pos, struct tplg_elem, list);
 		if (!elem->widget || elem->type != PARSER_TYPE_DAPM_WIDGET) {
@@ -216,13 +216,13 @@ int tplg_build_widgets(snd_tplg_t *tplg)
 
 int tplg_build_routes(snd_tplg_t *tplg)
 {
-	struct list_head *base, *pos, *npos;
+	struct list_head *base, *pos;
 	struct tplg_elem *elem;
 	struct snd_soc_tplg_dapm_graph_elem *route;
 
 	base = &tplg->route_list;
 
-	list_for_each_safe(pos, npos, base) {
+	list_for_each(pos, base) {
 		elem = list_entry(pos, struct tplg_elem, list);
 
 		if (!elem->route || elem->type != PARSER_TYPE_DAPM_GRAPH) {
