@@ -557,7 +557,7 @@ int tplg_parse_pcm(snd_tplg_t *tplg,
 			continue;
 		}
 
-		if (strcmp(id, "ID") == 0) {
+		if (strcmp(id, "id") == 0) {
 			if (snd_config_get_string(n, &val) < 0)
 				return -EINVAL;
 
@@ -642,7 +642,7 @@ int tplg_parse_be(snd_tplg_t *tplg,
 			continue;
 		}
 
-		if (strcmp(id, "ID") == 0) {
+		if (strcmp(id, "id") == 0) {
 			if (snd_config_get_string(n, &val) < 0)
 				return -EINVAL;
 
@@ -732,7 +732,7 @@ int tplg_parse_cc(snd_tplg_t *tplg,
 			continue;
 		}
 
-		if (strcmp(id, "ID") == 0) {
+		if (strcmp(id, "id") == 0) {
 			if (snd_config_get_string(n, &val) < 0)
 				return -EINVAL;
 
