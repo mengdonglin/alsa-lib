@@ -236,6 +236,8 @@ static int tplg_parse_data_hex(snd_config_t *cfg, struct tplg_elem *elem,
  *		bytes "0x12,0x34,0x56,0x78"
  *		shorts "0x1122,0x3344,0x5566,0x7788"
  *		words "0xaabbccdd,0x11223344,0x66aa77bb,0xefef1234"
+ *		index "1"
+ *		type "7"
  * }
  */
 int tplg_parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
@@ -243,7 +245,7 @@ int tplg_parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 {
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
-	const char *id;
+	const char *id, *val = NULL;
 	int err = 0;
 	struct tplg_elem *elem;
 
@@ -291,6 +293,24 @@ int tplg_parse_data(snd_tplg_t *tplg, snd_config_t *cfg,
 				SNDERR("error: failed to parse data words\n");
 				return err;
 			}
+			continue;
+		}
+
+		if (strcmp(id, "index") == 0) {
+			if (snd_config_get_string(n, &val) < 0)
+				return -EINVAL;
+
+			elem->index = atoi(val);
+			tplg_dbg("\t%s: %d\n", id, elem->index);
+			continue;
+		}
+
+		if (strcmp(id, "type") == 0) {
+			if (snd_config_get_string(n, &val) < 0)
+				return -EINVAL;
+
+			elem->vendor_type = atoi(val);
+			tplg_dbg("\t%s: %d\n", id, elem->index);
 			continue;
 		}
 	}
@@ -345,13 +365,14 @@ int tplg_copy_data(struct tplg_elem *elem, struct tplg_elem *ref)
 		break;
 
 	default:
-		SNDERR("elem '%s': type %d shall not have private data\n",
+		SNDERR("elem '%s': type %d private data not supported \n",
 			elem->id, elem->type);
 		return -EINVAL;
 	}
 
 	elem->size += priv_data_size;
 	priv->size = priv_data_size;
+	ref->compound_elem = 1;
 	memcpy(priv->data, ref->data->data, priv_data_size);
 	return 0;
 }

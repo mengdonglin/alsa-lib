@@ -117,6 +117,7 @@ struct tplg_elem {
 
 	int size; /* total size of this object inc pdata and ref objects */
 	int compound_elem; /* dont write this element as individual elem */
+	int vendor_type; /* vendor type for private data */
 
 	/* UAPI object for this elem */
 	union {

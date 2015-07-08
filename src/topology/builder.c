@@ -82,19 +82,49 @@ static int write_block_header(snd_tplg_t *tplg, unsigned int type,
 	return bytes;
 }
 
+static int write_data_block(snd_tplg_t *tplg, int size, int tplg_type,
+	const char *obj_name, void *data)
+{
+	int ret;
+
+	/* write the header for this block */
+	ret = write_block_header(tplg, tplg_type, 0,
+		SND_SOC_TPLG_ABI_VERSION, 0, size, 1);
+	if (ret < 0) {
+		SNDERR("error: failed to write %s block %d\n", obj_name, ret);
+		return ret;
+	}
+
+	verbose(tplg, " %s : write %d bytes\n", obj_name, size);
+
+	ret = write(tplg->out_fd, data, size);
+	if (ret < 0) {
+		SNDERR("error: failed to write %s %d\n", obj_name, ret);
+		return ret;
+	}
+
+	return 0;
+}
+
 static int write_elem_block(snd_tplg_t *tplg,
 	struct list_head *base, int size, int tplg_type, const char *obj_name)
 {
 	struct list_head *pos;
 	struct tplg_elem *elem;
-	int ret, wsize = 0, count = 0;
+	int ret, wsize = 0, count = 0, vendor_type;
 
 	/* count number of elements */
 	list_for_each(pos, base)
 		count++;
 
 	/* write the header for this block */
-	ret = write_block_header(tplg, tplg_type, 0,
+	list_for_each(pos, base) {
+		elem = list_entry(pos, struct tplg_elem, list);
+		vendor_type = elem->vendor_type;
+		break;
+	}
+
+	ret = write_block_header(tplg, tplg_type, vendor_type,
 		SND_SOC_TPLG_ABI_VERSION, 0, size, count);
 	if (ret < 0) {
 		SNDERR("error: failed to write %s block %d\n",
@@ -199,6 +229,9 @@ static int write_block(snd_tplg_t *tplg, struct list_head *base,
 	case PARSER_TYPE_MANIFEST:
 		return write_data_block(tplg, size, SND_SOC_TPLG_TYPE_MANIFEST,
 			"manifest", &tplg->manifest);
+	case PARSER_TYPE_DATA:
+		return write_elem_block(tplg, base, size,
+			SND_SOC_TPLG_TYPE_PDATA, "data");
 	default:
 		return -EINVAL;
 	}
@@ -279,6 +312,14 @@ int tplg_write_data(snd_tplg_t *tplg)
 		PARSER_TYPE_DAPM_GRAPH);
 	if (ret < 0) {
 		SNDERR("failed to write graph elems %d\n", ret);
+		return ret;
+	}
+
+	/* write private data */
+	ret = write_block(tplg, &tplg->pdata_list,
+		PARSER_TYPE_DATA);
+	if (ret < 0) {
+		SNDERR("failed to write private data %d\n", ret);
 		return ret;
 	}
 
