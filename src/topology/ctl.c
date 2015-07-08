@@ -166,6 +166,9 @@ int tplg_build_controls(snd_tplg_t *tplg)
 		err = tplg_build_mixer_control(tplg, elem);
 		if (err < 0)
 			return err;
+
+		/* add control to manifest */
+		tplg->manifest.control_elems++;
 	}
 
 	base = &tplg->enum_list;
@@ -175,6 +178,9 @@ int tplg_build_controls(snd_tplg_t *tplg)
 		err = tplg_build_enum_control(tplg, elem);
 		if (err < 0)
 			return err;
+
+		/* add control to manifest */
+		tplg->manifest.control_elems++;
 	}
 
 	base = &tplg->bytes_ext_list;
@@ -184,6 +190,9 @@ int tplg_build_controls(snd_tplg_t *tplg)
 		err = tplg_build_bytes_control(tplg, elem);
 		if (err < 0)
 			return err;
+
+		/* add control to manifest */
+		tplg->manifest.control_elems++;
 	}
 
 	return 0;

@@ -209,6 +209,9 @@ int tplg_build_widgets(snd_tplg_t *tplg)
 		err = tplg_build_widget(tplg, elem);
 		if (err < 0)
 			return err;
+
+		/* add widget to manifest */
+		tplg->manifest.widget_elems++;
 	}
 
 	return 0;
@@ -269,6 +272,9 @@ int tplg_build_routes(snd_tplg_t *tplg)
 			SNDERR("warning: Undefined source widget/stream '%s'\n",
 				route->source);
 		}
+
+		/* add graph to manifest */
+		tplg->manifest.graph_elems++;
 	}
 
 	return 0;

@@ -55,6 +55,7 @@ enum parser_type {
 	PARSER_TYPE_DAPM_GRAPH,
 	PARSER_TYPE_BE,
 	PARSER_TYPE_CC,
+	PARSER_TYPE_MANIFEST,
 };
 
 struct snd_tplg {
@@ -73,6 +74,9 @@ struct snd_tplg {
 	unsigned int next_hdr_pos;
 	int index;
 	int channel_idx;
+
+	/* manifest */
+	struct snd_soc_tplg_manifest manifest;
 
 	/* list of each element type */
 	struct list_head tlv_list;

@@ -196,6 +196,9 @@ static int write_block(snd_tplg_t *tplg, struct list_head *base,
 	case PARSER_TYPE_CC:
 		return write_elem_block(tplg, base, size,
 			SND_SOC_TPLG_TYPE_DAI_LINK, "cc");
+	case PARSER_TYPE_MANIFEST:
+		return write_data_block(tplg, size, SND_SOC_TPLG_TYPE_MANIFEST,
+			"manifest", &tplg->manifest);
 	default:
 		return -EINVAL;
 	}
@@ -206,6 +209,14 @@ static int write_block(snd_tplg_t *tplg, struct list_head *base,
 int tplg_write_data(snd_tplg_t *tplg)
 {
 	int ret;
+
+	/* write manifest */
+	ret = write_data_block(tplg, sizeof(tplg->manifest),
+		PARSER_TYPE_MANIFEST, "manifest", &tplg->manifest);
+	if (ret < 0) {
+		SNDERR("failed to write manifest %d\n", ret);
+		return ret;
+	}
 
 	/* write mixer elems. */
 	ret = write_block(tplg, &tplg->mixer_list,
