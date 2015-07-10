@@ -103,23 +103,44 @@ static void dump_priv_data(struct tplg_elem *elem)
 	tplg_dbg("\n\n");
 }
 
+/* get number of hex value elements in CSV list */
 static int get_hex_num(const char *str)
 {
-	char *tmp, *s = NULL;
-	int i = 0;
+	int commas = 0, values = 0, len = strlen(str);
+	const char *end = str + len;
 
-	tmp = strdup(str);
-	if (tmp == NULL)
-		return -ENOMEM;
+	/* we expect "0x0, 0x0, 0x0" */
+	while (str < end) {
 
-	s = strtok(tmp, ",");
-	while (s != NULL) {
-		s = strtok(NULL, ",");
-		i++;
+		/* skip white space */
+		if (isspace(str)) {
+			str++;
+			continue;
+		}
+
+		/* find delimeters */
+		if (*str == ',') {
+			commas++;
+			str++;
+			continue;
+		}
+
+		/* find 0x[0-9] values */
+		if (*str == '0' && str + 2 <= end) {
+			if (str[1] == 'x' && str[2] >= '0' && str[2] <= '9') {
+				values++;
+				str += 3;
+			} else {
+				str++;
+			}
+		}
 	}
 
-	free(tmp);
-	return i;
+	/* there should always be one less comma than value */
+	if (values -1 != commas)
+		return -EINVAL;
+
+	return values;
 }
 
 static int write_hex(char *buf, char *str, int width)
@@ -193,6 +214,11 @@ static int tplg_parse_data_hex(snd_config_t *cfg, struct tplg_elem *elem,
 		return -EINVAL;
 
 	num = get_hex_num(value);
+	if (num <= 0) {
+		SNDERR("error: malformed hex variable list %s\n", value);
+		return -EINVAL;
+	}
+
 	size = num * width;
 	priv = elem->data;
 
