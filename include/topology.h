@@ -38,6 +38,24 @@ extern "C" {
  *
  */
 
+/* topology object type not used by kernel */
+enum parser_type {
+	PARSER_TYPE_TLV = 0,
+	PARSER_TYPE_MIXER,
+	PARSER_TYPE_ENUM,
+	PARSER_TYPE_TEXT,
+	PARSER_TYPE_DATA,
+	PARSER_TYPE_BYTES,
+	PARSER_TYPE_STREAM_CONFIG,
+	PARSER_TYPE_STREAM_CAPS,
+	PARSER_TYPE_PCM,
+	PARSER_TYPE_DAPM_WIDGET,
+	PARSER_TYPE_DAPM_GRAPH,
+	PARSER_TYPE_BE,
+	PARSER_TYPE_CC,
+	PARSER_TYPE_MANIFEST,
+};
+
 typedef struct snd_tplg snd_tplg_t;
 
 /**
@@ -67,6 +85,37 @@ int snd_tplg_build(snd_tplg_t *tplg, const char *infile, const char *outfile);
  * \param verbose Enable verbose output if non zero
  */
 void snd_tplg_verbose(snd_tplg_t *tplg, int verbose);
+
+struct snd_tplg_widget_template {
+
+};
+
+struct snd_tplg_ctl_template {
+
+};
+
+struct snd_tplg_graph_elem {
+	const char *src, *ctl, *sink;
+};
+
+struct snd_tplg_graph_template {
+	int count;
+	struct snd_tplg_graph_elem elem[0];
+};
+
+typedef struct snd_tplg_obj_template {
+	enum parser_type type;
+	int index;
+	int version;		/* optional vendor specific version details */
+	int vendor_type;	/* optional vendor specific type info */
+	union {
+		struct snd_tplg_widget_template *widget;
+		struct snd_tplg_ctl_template *ctl;
+		struct snd_tplg_graph_template *graph;
+	};
+};
+
+int snd_tplg_add_object(snd_tplg_t *tplg, snd_tplg_obj_template *t);
 
 #ifdef __cplusplus
 }

@@ -40,24 +40,6 @@
 struct tplg_ref;
 struct tplg_elem;
 
-/* internal topology object type not used by kernel */
-enum parser_type {
-	PARSER_TYPE_TLV = 0,
-	PARSER_TYPE_MIXER,
-	PARSER_TYPE_ENUM,
-	PARSER_TYPE_TEXT,
-	PARSER_TYPE_DATA,
-	PARSER_TYPE_BYTES,
-	PARSER_TYPE_STREAM_CONFIG,
-	PARSER_TYPE_STREAM_CAPS,
-	PARSER_TYPE_PCM,
-	PARSER_TYPE_DAPM_WIDGET,
-	PARSER_TYPE_DAPM_GRAPH,
-	PARSER_TYPE_BE,
-	PARSER_TYPE_CC,
-	PARSER_TYPE_MANIFEST,
-};
-
 struct snd_tplg {
 
 	/* opaque vendor data */
