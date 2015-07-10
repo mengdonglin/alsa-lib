@@ -113,7 +113,7 @@ static int get_hex_num(const char *str)
 	while (str < end) {
 
 		/* skip white space */
-		if (isspace(str)) {
+		if (isspace(*str)) {
 			str++;
 			continue;
 		}
@@ -127,13 +127,15 @@ static int get_hex_num(const char *str)
 
 		/* find 0x[0-9] values */
 		if (*str == '0' && str + 2 <= end) {
-			if (str[1] == 'x' && str[2] >= '0' && str[2] <= '9') {
+			if (str[1] == 'x' && str[2] >= '0' && str[2] <= 'f') {
 				values++;
 				str += 3;
 			} else {
 				str++;
 			}
 		}
+
+		str++;
 	}
 
 	/* there should always be one less comma than value */
