@@ -114,9 +114,12 @@ struct tplg_elem* tplg_elem_new_common(snd_tplg_t *tplg,
 	if (!elem)
 		return NULL;
 
-	snd_config_get_id(cfg, &id);
-	strncpy(elem->id, id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
-	elem->id[SNDRV_CTL_ELEM_ID_NAME_MAXLEN - 1] = 0;
+	/* do we get name from cfg */
+	if (cfg) {
+		snd_config_get_id(cfg, &id);
+		strncpy(elem->id, id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+		elem->id[SNDRV_CTL_ELEM_ID_NAME_MAXLEN - 1] = 0;
+	}
 
 	switch (type) {
 	case PARSER_TYPE_DATA:

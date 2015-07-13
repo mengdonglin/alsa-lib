@@ -564,3 +564,15 @@ int tplg_parse_dapm_widget(snd_tplg_t *tplg,
 
 	return 0;
 }
+
+int tplg_add_graph_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
+{
+	/* TODO: create elem and copy items to elem */
+	return 0;
+}
+
+int tplg_add_widget_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
+{
+	/* TODO: create elem and copy items to elem */
+	return 0;
+}

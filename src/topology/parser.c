@@ -260,7 +260,8 @@ static int tplg_build_integ(snd_tplg_t *tplg)
 	return err;
 }
 
-int snd_tplg_build(snd_tplg_t *tplg, const char *infile, const char *outfile)
+int snd_tplg_build_file(snd_tplg_t *tplg, const char *infile,
+	const char *outfile)
 {
 	snd_config_t *cfg = NULL;
 	int err = 0;
@@ -306,6 +307,63 @@ out:
 out_close:
 	close(tplg->out_fd);
 	return err;
+}
+
+int snd_tplg_add_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
+{
+	switch (t->type) {
+	case PARSER_TYPE_MIXER:
+		return tplg_add_mixer_object(tplg, t);
+	case PARSER_TYPE_ENUM:
+		return tplg_add_enum_object(tplg, t);
+	case PARSER_TYPE_BYTES:
+		return tplg_add_bytes_object(tplg, t);
+	case PARSER_TYPE_DAPM_WIDGET:
+		return tplg_add_widget_object(tplg, t);
+	case PARSER_TYPE_DAPM_GRAPH:
+		return tplg_add_graph_object(tplg, t);
+	default:
+		SNDERR("error: invalid object type %d\n", t->type);
+		return -EINVAL;
+	};
+}
+
+int snd_tplg_build(snd_tplg_t *tplg, const char *outfile)
+{
+	int err;
+
+	/* delete any old output files */
+	unlink(outfile);
+
+	tplg->out_fd =
+		open(outfile, O_RDWR | O_CREAT, S_IRWXU | S_IRWXG | S_IRWXO);
+	if (tplg->out_fd < 0) {
+		SNDERR("error: failed to open %s err %d\n",
+			outfile, -errno);
+		return -errno;
+	}
+
+	err = tplg_build_integ(tplg);
+	if (err < 0) {
+		SNDERR("error: failed to check topology integrity\n");
+		goto out;
+	}
+
+	err = tplg_write_data(tplg);
+	if (err < 0) {
+		SNDERR("error: failed to write data %d\n", err);
+		goto out;
+	}
+
+out:
+	close(tplg->out_fd);
+	return err;
+}
+
+int snd_tplp_set_manifest_data(snd_tplg_t *tplg, const void *data, int len)
+{
+	tplg->manifest.priv.size = len;
+	tplg->manifest_pdata = data;
 }
 
 void snd_tplg_verbose(snd_tplg_t *tplg, int verbose)

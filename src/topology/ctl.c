@@ -679,3 +679,44 @@ int tplg_parse_control_mixer(snd_tplg_t *tplg,
 
 	return 0;
 }
+
+int tplg_add_mixer_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
+{
+	struct snd_soc_tplg_mixer_control *mc;
+	struct tplg_elem *elem;
+	int j;
+
+	elem = tplg_elem_new_common(tplg, NULL, PARSER_TYPE_MIXER);
+	if (!elem)
+		return -ENOMEM;
+
+	/* init new mixer */
+	mc = elem->mixer_ctrl;
+	elem_copy_text(mc->hdr.name, t->ctl->name,
+		SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+	mc->hdr.type = SND_SOC_TPLG_TYPE_MIXER;
+	mc->size = elem->size;
+	tplg->channel_idx = 0;
+
+	/* set channel reg to default state */
+	for (j = 0; j < SND_SOC_TPLG_MAX_CHAN; j++)
+		mc->channel[j].reg = -1;
+
+	tplg_dbg(" Control Mixer: %s\n", t->ctl->name);
+
+	/* TODO: copy rest of items to elem */
+
+	return 0;
+}
+
+int tplg_add_enum_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
+{
+	/* TODO: create elem and copy items to elem */
+	return 0;
+}
+
+int tplg_add_bytes_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
+{
+	/* TODO: create elem and copy items to elem */
+	return 0;
+}

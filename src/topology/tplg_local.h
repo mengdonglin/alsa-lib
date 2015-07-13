@@ -59,6 +59,7 @@ struct snd_tplg {
 
 	/* manifest */
 	struct snd_soc_tplg_manifest manifest;
+	const void *manifest_pdata;	/* copied by builder at file write */
 
 	/* list of each element type */
 	struct list_head tlv_list;
@@ -214,3 +215,9 @@ int tplg_parse_ops(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 
 struct tplg_elem *lookup_pcm_dai_stream(struct list_head *base,
 	const char* id);
+
+int tplg_add_mixer_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t);
+int tplg_add_enum_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t);
+int tplg_add_bytes_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t);
+int tplg_add_widget_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t);
+int tplg_add_graph_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t);
