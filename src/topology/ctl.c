@@ -692,7 +692,7 @@ int tplg_add_mixer_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 
 	/* init new mixer */
 	mc = elem->mixer_ctrl;
-	elem_copy_text(mc->hdr.name, t->ctl->name,
+	elem_copy_text(mc->hdr.name, t->mixer->hdr.name,
 		SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
 	mc->hdr.type = SND_SOC_TPLG_TYPE_MIXER;
 	mc->size = elem->size;
@@ -702,7 +702,7 @@ int tplg_add_mixer_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 	for (j = 0; j < SND_SOC_TPLG_MAX_CHAN; j++)
 		mc->channel[j].reg = -1;
 
-	tplg_dbg(" Control Mixer: %s\n", t->ctl->name);
+	tplg_dbg(" Control Mixer: %s\n", t->mixer->hdr.name);
 
 	/* TODO: copy rest of items to elem */
 

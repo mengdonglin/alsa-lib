@@ -189,7 +189,7 @@ typedef struct snd_tplg_obj_template {
 	int vendor_type;	/* optional vendor specific type info */
 	union {
 		struct snd_tplg_widget_template *widget;
-		struct snd_tplg_ctl_template *ctl;
+		struct snd_tplg_mixer_template *mixer;
 		struct snd_tplg_graph_template *graph;
 	};
 } snd_tplg_obj_template_t;
