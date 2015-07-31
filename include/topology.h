@@ -616,6 +616,12 @@ typedef struct snd_tplg_obj_template {
 	};
 } snd_tplg_obj_template_t;
 
+int snd_tplg_add_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t);
+
+int snd_tplg_build(snd_tplg_t *tplg, const char *outfile);
+
+int snd_tplp_set_manifest_data(snd_tplg_t *tplg, const void *data, int len);
+
 /* \} */
 
 #ifdef __cplusplus
