@@ -40,24 +40,6 @@
 struct tplg_ref;
 struct tplg_elem;
 
-/* internal topology object type not used by kernel */
-enum object_type {
-	OBJECT_TYPE_TLV = 0,
-	OBJECT_TYPE_MIXER,
-	OBJECT_TYPE_ENUM,
-	OBJECT_TYPE_TEXT,
-	OBJECT_TYPE_DATA,
-	OBJECT_TYPE_BYTES,
-	OBJECT_TYPE_STREAM_CONFIG,
-	OBJECT_TYPE_STREAM_CAPS,
-	OBJECT_TYPE_PCM,
-	OBJECT_TYPE_DAPM_WIDGET,
-	OBJECT_TYPE_DAPM_GRAPH,
-	OBJECT_TYPE_BE,
-	OBJECT_TYPE_CC,
-	OBJECT_TYPE_MANIFEST,
-};
-
 struct snd_tplg {
 
 	/* opaque vendor data */
