@@ -627,7 +627,9 @@ static int init_ctl_hdr(struct snd_soc_tplg_ctl_hdr *hdr,
 		SNDRV_CTL_ELEM_ACCESS_TLV_CALLBACK);
 
 	hdr->access = t->access;
-	hdr->ops = t->ops;
+	hdr->ops.get = t->ops.get;
+	hdr->ops.put = t->ops.put;
+	hdr->ops.info = t->ops.info;
 
 	/* TLV */
 	if (hdr->access & SNDRV_CTL_ELEM_ACCESS_TLV_READWRITE
@@ -821,7 +823,8 @@ int tplg_add_bytes(snd_tplg_t *tplg, struct snd_tplg_bytes_template *bytes_ctl, 
 	be->mask = bytes_ctl->mask;
 	be->base = bytes_ctl->base;
 	be->num_regs = bytes_ctl->num_regs;
-	be->ext_ops = bytes_ctl->ext_ops;
+	be->ext_ops.put = bytes_ctl->ext_ops.put;
+	be->ext_ops.get = bytes_ctl->ext_ops.get;
 
 	if (bytes_ctl->priv != NULL) {
 		be = realloc(be,

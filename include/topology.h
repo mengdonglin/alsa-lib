@@ -21,8 +21,6 @@
 #ifndef __ALSA_TOPOLOGY_H
 #define __ALSA_TOPOLOGY_H
 
-#include <sound/asoc.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -458,6 +456,8 @@ extern "C" {
  *
  */
 
+#define SND_TPLG_MAX_CHAN		8
+
 /** Topology context */
 typedef struct snd_tplg snd_tplg_t;
 
@@ -529,7 +529,7 @@ struct snd_tplg_channel_elem {
 
 struct snd_tplg_channel_map_template {
 	int num_channels;
-	struct snd_tplg_channel_elem channel[SND_SOC_TPLG_MAX_CHAN];
+	struct snd_tplg_channel_elem channel[SND_TPLG_MAX_CHAN];
 };
 
 struct snd_tplg_pdata_template {
@@ -537,11 +537,17 @@ struct snd_tplg_pdata_template {
 	const void *data;
 };
 
+struct snd_tplg_io_ops_template {
+	int get;
+	int put;
+	int info;
+};
+
 struct snd_tplg_ctl_template {
 	int type;
 	const char *name;
 	int access;
-	struct snd_soc_tplg_io_ops ops;
+	struct snd_tplg_io_ops_template ops;
 	struct snd_tplg_tlv_template *tlv; /* non NULL means we have TLV data */
 };
 
@@ -572,7 +578,7 @@ struct snd_tplg_bytes_template {
 	int mask;
 	int base;
 	int num_regs;
-	struct snd_soc_tplg_io_ops ext_ops;
+	struct snd_tplg_io_ops_template ext_ops;
 	struct snd_soc_tplg_private *priv;
 };
 
