@@ -177,7 +177,6 @@ struct snd_soc_tplg_ctl_hdr {
 	char name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN];
 	__le32 access;
 	struct snd_soc_tplg_kcontrol_ops_id ops;
-	__le32 tlv_size;	/* non zero means control has TLV data */
 	struct snd_soc_tplg_ctl_tlv tlv;
 } __attribute__((packed));
 
