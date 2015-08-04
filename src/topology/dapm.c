@@ -242,6 +242,7 @@ int tplg_build_routes(snd_tplg_t *tplg)
 		tplg_dbg("\nCheck route: sink '%s', control '%s', source '%s'\n",
 			route->sink, route->control, route->source);
 
+#if 0
 		/* validate sink */
 		if (strlen(route->sink) <= 0) {
 			SNDERR("error: no sink\n");
@@ -276,7 +277,7 @@ int tplg_build_routes(snd_tplg_t *tplg)
 			SNDERR("warning: Undefined source widget/stream '%s'\n",
 				route->source);
 		}
-
+#endif
 		/* add graph to manifest */
 		tplg->manifest.graph_elems++;
 	}
