@@ -15,6 +15,9 @@
 #ifndef __LINUX_UAPI_SND_ASOC_H
 #define __LINUX_UAPI_SND_ASOC_H
 
+#include <linux/types.h>
+#include <sound/asound.h>
+
 /*
  * Maximum number of channels topology kcontrol can represent.
  */
@@ -28,7 +31,8 @@
 /*
  * Maximum number of PCM stream configs
  */
-#define SND_SOC_TPLG_STREAM_CONFIG_MAX  8
+#define SND_SOC_TPLG_STREAM_MAX	8
+#define SND_SOC_TPLG_STREAM_CONFIG_MAX  8	/* will be replaced by above macro */
 
 /* individual kcontrol info types - can be mixed with other types */
 #define SND_SOC_TPLG_CTL_VOLSW		1
@@ -188,8 +192,8 @@ struct snd_soc_tplg_ctl_hdr {
  */
 struct snd_soc_tplg_stream_caps {
 	__le32 size;		/* in bytes of this structure */
-	char name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN];
-	__le64 formats;	/* supported formats SNDRV_PCM_FORMAT_* */
+	char name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN];  /* TO REMOVE */
+	__le64 formats;	/* supported formats SNDRV_PCM_FMTBIT_* */
 	__le32 rates;		/* supported rates SNDRV_PCM_RATE_* */
 	__le32 rate_min;	/* min rate */
 	__le32 rate_max;	/* max rate */
@@ -208,23 +212,12 @@ struct snd_soc_tplg_stream_caps {
  */
 struct snd_soc_tplg_stream {
 	__le32 size;		/* in bytes of this structure */
+	char name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN];
 	__le64 format;		/* SNDRV_PCM_FMTBIT_* */
 	__le32 rate;		/* SNDRV_PCM_RATE_* */
 	__le32 period_bytes;	/* size of period in bytes */
 	__le32 buffer_bytes;	/* size of buffer in bytes */
 	__le32 channels;	/* channels */
-	__le32 tdm_slot;	/* optional BE bitmask of supported TDM slots */
-	__le32 dai_fmt;		/* SND_SOC_DAIFMT_  */
-} __attribute__((packed));
-
-/*
- * Duplex stream configuration supported by SW/FW.
- */
-struct snd_soc_tplg_stream_config {
-	__le32 size;		/* in bytes of this structure */
-	char name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN];
-	struct snd_soc_tplg_stream playback;
-	struct snd_soc_tplg_stream capture;
 } __attribute__((packed));
 
 /*
@@ -357,11 +350,11 @@ struct snd_soc_tplg_dapm_widget {
 	__le32 shift;		/* bits to shift */
 	__le32 mask;		/* non-shifted mask */
 	__le32 subseq;		/* sort within widget type */
-	__u32 invert;		/* invert the power bit */
-	__u32 ignore_suspend;	/* kept enabled over suspend */
-	__u16 event_flags;
-	__u16 event_type;
-	__u16 num_kcontrols;
+	__le32 invert;		/* invert the power bit */
+	__le32 ignore_suspend;	/* kept enabled over suspend */
+	__le16 event_flags;
+	__le16 event_type;
+	__le32 num_kcontrols;
 	struct snd_soc_tplg_private priv;
 	/*
 	 * kcontrols that relate to this widget
@@ -369,11 +362,6 @@ struct snd_soc_tplg_dapm_widget {
 	 */
 } __attribute__((packed));
 
-struct snd_soc_tplg_pcm_cfg_caps {
-	struct snd_soc_tplg_stream_caps caps;
-	struct snd_soc_tplg_stream_config configs[SND_SOC_TPLG_STREAM_CONFIG_MAX];
-	__le32 num_configs;	/* number of configs */
-} __attribute__((packed));
 
 /*
  * Describes SW/FW specific features of PCM or DAI link.
@@ -384,15 +372,46 @@ struct snd_soc_tplg_pcm_cfg_caps {
  * +-----------------------------------+-----+
  * | struct snd_soc_tplg_dapm_pcm_dai  |  N  |
  * +-----------------------------------+-----+
+
+When parsed this structure
+
+1) registers a FE DAI device
+2) struct snd_soc_dai_link entry for a FE
+3) registers a PCM device. Configs used to populate struct snd_soc_pcm_stream in
+the dai_link
+
+We do NOT need to map any DAI ops as all the DAI ops are passed struct snd_soc_dai
+which contains our ID number (and this can be used by the dai driver ops to
+determine correct course of action).
+
+Mendong, caps are used here to populate snd_soc_dai_driver.
+if 0 then we use hard coded values. configs used to populate dai_link params.
+
  */
-struct snd_soc_tplg_pcm_dai {
+struct snd_soc_tplg_pcm {   //renamed
 	__le32 size;		/* in bytes of this structure */
-	char name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN];
-	__le32 id;			/* unique ID - used to match */
+	char pcm_name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN];
+	char dai_name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN];
+	__le32 pcm_id;			/* unique ID - used to match */
+	__le32 dai_id;		/* unique ID - used to match */
 	__le32 playback;		/* supports playback mode */
 	__le32 capture;			/* supports capture mode */
 	__le32 compress;		/* 1 = compressed; 0 = PCM */
-	struct snd_soc_tplg_pcm_cfg_caps capconf[2];	/* capabilities and configs */
+	struct snd_soc_tplg_stream stream[SND_SOC_TPLG_STREAM_MAX]; /* for DAI link */
+	__le32 num_streams;	/* number of streams */
+	struct snd_soc_tplg_stream_caps caps[2]; /* playback and capture for DAI */
+// we are missing config items for compressed config and caps.
+
 } __attribute__((packed));
 
+/* 
+ * this is used to specify the link runtime supported configs or params
+*/
+struct snd_soc_tplg_link_config {
+	__le32 size;		/* in bytes of this structure */
+	char name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN]; /* DAI link name. TO remove? */
+	__le32 id;		/* unique ID - used to match */
+	struct snd_soc_tplg_stream stream[2][SND_SOC_TPLG_STREAM_MAX]; /* supported configs playback and captrure */
+	__le32 num_streams;	/* number of streams */
+} __attribute__((packed));
 #endif
