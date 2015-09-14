@@ -628,3 +628,51 @@ int tplg_parse_cc(snd_tplg_t *tplg,
 
 	return 0;
 }
+
+/* copy stream object */
+static void tplg_add_stream_object(struct snd_soc_tplg_stream *to_link,
+				struct snd_tplg_stream_template *from_link)
+{
+	elem_copy_text(to_link->name, from_link->name, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+	to_link->format = from_link->format;
+	to_link->rate = from_link->rate;
+	to_link->period_bytes = from_link->period_bytes;
+	to_link->buffer_bytes = from_link->buffer_bytes;
+	to_link->channels = from_link->channels;
+}
+
+int tplg_add_link_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
+{
+	struct snd_tplg_link_template *link = t->link;
+	struct snd_soc_tplg_link_config *lk;
+	struct tplg_elem *elem;
+	int i;
+
+	/* here type can be either BE or CC. */
+	elem = tplg_elem_new_common(tplg, NULL, link->name, t->type);
+
+	if (!elem)
+		return -ENOMEM;
+	if (t->type == SND_TPLG_TYPE_BE) {
+		tplg_dbg("BE Link: %s", link->name);
+		lk = elem->be;
+	}
+	else if (t->type == SND_TPLG_TYPE_CC) {
+		tplg_dbg("CC Link: %s", link->name);
+		lk = elem->cc;
+	}
+	else {
+		tplg_elem_free(elem);
+		return -EINVAL;
+	}
+
+	lk->size = elem->size;
+	lk->id = link->id;
+	elem_copy_text(lk->name, link->name, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+	lk->num_streams = link->num_streams;
+
+	for (i=0; i < lk->num_streams; i++)
+		tplg_add_stream_object(lk->stream[i], &link->stream[i]);
+
+	return 0;
+}
