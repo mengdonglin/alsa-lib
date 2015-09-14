@@ -657,7 +657,8 @@ struct snd_tplg_stream_template {
 	int rate; 		/*!< SNDRV_PCM_RATE_* */
 	int period_bytes; 	/*!< size of period in bytes */
 	int buffer_bytes; 	/*!< size of buffer in bytes. */
-	int channels; 		/*!< channels */
+	int channels_min; 	/*!< minimum number of channels supported */
+	int channels_max;	/*!< maximum number of channels supported */
 };
 
 /** \struct snd_tplg_link_template
