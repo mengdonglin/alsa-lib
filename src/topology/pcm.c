@@ -209,9 +209,15 @@ static int tplg_parse_stream_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 			continue;
 		}
 
-		if (strcmp(id, "channels") == 0) {
-			stream->channels = atoi(val);
-			tplg_dbg("\t\t%s: %d\n", id, stream->channels);
+		if (strcmp(id, "channels_min") == 0) {
+			stream->channels_min = atoi(val);
+			tplg_dbg("\t\t%s: %d\n", id, stream->channels_min);
+			continue;
+		}
+
+		if (strcmp(id, "channels_max") == 0) {
+			stream->channels_max = atoi(val);
+			tplg_dbg("\t\t%s: %d\n", id, stream->channels_max);
 			continue;
 		}
 	}
@@ -638,7 +644,8 @@ static void tplg_add_stream_object(struct snd_soc_tplg_stream *to_link,
 	to_link->rate = from_link->rate;
 	to_link->period_bytes = from_link->period_bytes;
 	to_link->buffer_bytes = from_link->buffer_bytes;
-	to_link->channels = from_link->channels;
+	to_link->channels_min = from_link->channels_min;
+	to_link->channels_max = from_link->channels_max;
 }
 
 int tplg_add_link_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
