@@ -679,7 +679,7 @@ int tplg_add_link_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 	lk->num_streams = link->num_streams;
 
 	for (i=0; i < lk->num_streams; i++)
-		tplg_add_stream_object(lk->stream[i], &link->stream[i]);
+		tplg_add_stream_object(&lk->stream[i], &link->stream[i]);
 
 	return 0;
 }
