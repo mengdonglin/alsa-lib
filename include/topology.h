@@ -668,7 +668,7 @@ struct snd_tplg_link_template {
 	const char *name; /* DAI Link name. */
 	int id; /* unique ID - used to match with existing BEs and CCs. */
 	int num_streams;
-	struct snd_tplg_stream_template stream[0]; /* supported configs capture and playback. */
+	struct snd_tplg_stream_template stream[0]; /* supported configs. */
 };
 
 /** \struct snd_tplg_obj_template
