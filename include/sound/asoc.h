@@ -411,7 +411,6 @@ struct snd_soc_tplg_pcm {   //renamed
 */
 struct snd_soc_tplg_link_config {
 	__le32 size;		/* in bytes of this structure */
-	char name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN]; /* DAI link name. TO remove? */
 	__le32 id;		/* unique ID - used to match */
 	struct snd_soc_tplg_stream stream[SND_SOC_TPLG_STREAM_MAX]; /* supported configs playback and captrure */
 	__le32 num_streams;	/* number of streams */

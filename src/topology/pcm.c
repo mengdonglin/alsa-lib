@@ -542,7 +542,7 @@ int tplg_parse_be(snd_tplg_t *tplg,
 
 	link = elem->be;
 	link->size = elem->size;
-	elem_copy_text(link->name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+	//elem_copy_text(link->name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
 
 	tplg_dbg(" BE: %s\n", elem->id);
 
@@ -675,7 +675,7 @@ int tplg_add_link_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 
 	lk->size = elem->size;
 	lk->id = link->id;
-	elem_copy_text(lk->name, link->name, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+	//elem_copy_text(lk->name, link->name, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
 	lk->num_streams = link->num_streams;
 
 	for (i=0; i < lk->num_streams; i++)
