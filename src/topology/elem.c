@@ -179,15 +179,15 @@ struct tplg_elem* tplg_elem_new_common(snd_tplg_t *tplg,
 		break;
 	case SND_TPLG_TYPE_PCM:
 		list_add_tail(&elem->list, &tplg->pcm_list);
-		obj_size = sizeof(struct snd_soc_tplg_pcm_dai);
+		obj_size = sizeof(struct snd_soc_tplg_pcm);
 		break;
 	case SND_TPLG_TYPE_BE:
 		list_add_tail(&elem->list, &tplg->be_list);
-		obj_size = sizeof(struct snd_soc_tplg_pcm_dai);
+		obj_size = sizeof(struct snd_soc_tplg_link_config);
 		break;
 	case SND_TPLG_TYPE_CC:
 		list_add_tail(&elem->list, &tplg->cc_list);
-		obj_size = sizeof(struct snd_soc_tplg_pcm_dai);
+		obj_size = sizeof(struct snd_soc_tplg_link_config);
 		break;
 	default:
 		free(elem);
