@@ -171,7 +171,7 @@ struct tplg_elem* tplg_elem_new_common(snd_tplg_t *tplg,
 		break;
 	case SND_TPLG_TYPE_STREAM_CONFIG:
 		list_add_tail(&elem->list, &tplg->pcm_config_list);
-		obj_size = sizeof(struct snd_soc_tplg_stream_config);
+		obj_size = sizeof(struct snd_soc_tplg_stream);
 		break;
 	case SND_TPLG_TYPE_STREAM_CAPS:
 		list_add_tail(&elem->list, &tplg->pcm_caps_list);
