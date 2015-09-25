@@ -208,9 +208,15 @@ static int tplg_parse_stream_cfg(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 			continue;
 		}
 
-		if (strcmp(id, "channels") == 0) {
-			stream->channels = atoi(val);
-			tplg_dbg("\t\t%s: %d\n", id, stream->channels);
+		if (strcmp(id, "channels_min") == 0) {
+			stream->channels_min = atoi(val);
+			tplg_dbg("\t\t%s: %d\n", id, stream->channels_min);
+			continue;
+		}
+
+		if (strcmp(id, "channels_max") == 0) {
+			stream->channels_max = atoi(val);
+			tplg_dbg("\t\t%s: %d\n", id, stream->channels_max);
 			continue;
 		}
 	}
