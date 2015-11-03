@@ -103,11 +103,31 @@ int tplg_build_pcm(snd_tplg_t *tplg, unsigned int type)
 	return 0;
 }
 
+static int tplg_build_stream_cfg(snd_tplg_t *tplg,
+	struct snd_soc_tplg_stream *stream, int num_streams)
+{
+	struct snd_soc_tplg_stream *strm;
+	struct tplg_elem *ref_elem;
+	int i;
+
+	for (i = 0; i < num_streams; i++) {
+		strm = stream + i;
+		ref_elem = tplg_elem_lookup(&tplg->pcm_config_list,
+			strm->name, SND_TPLG_TYPE_STREAM_CONFIG);
+
+		if (ref_elem && ref_elem->stream_cfg)
+			*strm = *ref_elem->stream_cfg;
+	}
+
+	return 0;
+}
+
 /* build BE/CC DAI link configurations */
 int tplg_build_link_cfg(snd_tplg_t *tplg, unsigned int type)
 {
 	struct list_head *base, *pos;
 	struct tplg_elem *elem;
+	struct snd_soc_tplg_link_config *link;
 	int err = 0;
 
 	switch (type) {
@@ -129,8 +149,13 @@ int tplg_build_link_cfg(snd_tplg_t *tplg, unsigned int type)
 			return -EINVAL;
 		}
 
-		/*TODO: export link configurations */
-		//err = tplg_build_stream_cfg(tplg, elem);
+		if (type == SND_TPLG_TYPE_BE)
+			link = elem->be;
+		else
+			link = elem->cc;
+
+		err = tplg_build_stream_cfg(tplg, link->stream,
+			link->num_streams);
 		if (err < 0)
 			return err;
 	}
