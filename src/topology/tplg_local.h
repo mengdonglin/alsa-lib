@@ -281,3 +281,4 @@ int tplg_build_pcm(snd_tplg_t *tplg, unsigned int type);
 int tplg_build_link_cfg(snd_tplg_t *tplg, unsigned int type);
 int tplg_add_link_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t);
 int tplg_add_pcm_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t);
+int tplg_add_be_dai_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t);

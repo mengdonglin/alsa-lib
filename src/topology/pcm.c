@@ -775,3 +775,37 @@ int tplg_add_link_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 
 	return 0;
 }
+
+int tplg_add_be_dai_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
+{
+	struct snd_tplg_be_dai_template *be_tpl = t->be_dai;
+	struct snd_soc_tplg_be_dai *be;
+	struct tplg_elem *elem;
+	int i;
+
+	tplg_dbg("BE DAI %s\n", be_tpl->dai_name);
+
+	elem = tplg_elem_new_common(tplg, NULL, be_tpl->dai_name,
+		SND_TPLG_TYPE_BE_DAI);
+	if (!elem)
+		return -ENOMEM;
+
+	be = elem->be_dai;
+	be->size = elem->size;
+
+	elem_copy_text(be->dai_name, be_tpl->dai_name,
+		SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+	be->dai_id = be_tpl->dai_id;
+	be->playback = be_tpl->playback;
+	be->capture = be_tpl->capture;
+
+	for (i = 0; i < 2; i++) {
+		if (be_tpl->caps[i])
+			tplg_add_stream_caps(&be->caps[i], be_tpl->caps[i]);
+	}
+
+	be->flag_mask = be_tpl->flag_mask;
+	be->flags = be_tpl->flags;
+
+	return 0;
+}
