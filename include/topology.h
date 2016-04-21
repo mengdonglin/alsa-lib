@@ -602,6 +602,7 @@ enum snd_tplg_type {
 	SND_TPLG_TYPE_PCM,		/*!< PCM stream device */
 	SND_TPLG_TYPE_DAPM_WIDGET,	/*!< DAPM widget */
 	SND_TPLG_TYPE_DAPM_GRAPH,	/*!< DAPM graph elements */
+	SND_TPLG_TYPE_BE_DAI,
 	SND_TPLG_TYPE_BE,		/*!< BE DAI link */
 	SND_TPLG_TYPE_CC,		/*!< Hostless codec <-> codec link */
 	SND_TPLG_TYPE_MANIFEST,		/*!< Topology manifest */
