@@ -204,6 +204,9 @@ static int write_block(snd_tplg_t *tplg, struct list_head *base,
 	case SND_TPLG_TYPE_DATA:
 		return write_elem_block(tplg, base, size,
 			SND_SOC_TPLG_TYPE_PDATA, "data");
+	case SND_TPLG_TYPE_BE_DAI:
+		return write_elem_block(tplg, base, size,
+			SND_SOC_TPLG_TYPE_BE_DAI, "be_dai");
 	default:
 		return -EINVAL;
 	}
@@ -290,6 +293,14 @@ int tplg_write_data(snd_tplg_t *tplg)
 		SND_TPLG_TYPE_PCM);
 	if (ret < 0) {
 		SNDERR("failed to write pcm elems %d\n", ret);
+		return ret;
+	}
+
+	/* write be dai elems */
+	ret = write_block(tplg, &tplg->be_dai_list,
+		SND_TPLG_TYPE_BE_DAI);
+	if (ret < 0) {
+		SNDERR("failed to write be dai elems %d\n", ret);
 		return ret;
 	}
 
