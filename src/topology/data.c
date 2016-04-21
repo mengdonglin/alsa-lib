@@ -855,6 +855,10 @@ int tplg_copy_data(struct tplg_elem *elem, struct tplg_elem *ref)
 		priv = &elem->widget->priv;
 		break;
 
+	case SND_TPLG_TYPE_BE_DAI:
+		priv = &elem->be_dai->priv;
+		break;
+
 	default:
 		SNDERR("error: elem '%s': type %d private data not supported \n",
 			elem->id, elem->type);

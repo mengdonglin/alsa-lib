@@ -266,6 +266,7 @@ static int tplg_parse_streams(snd_tplg_t *tplg, snd_config_t *cfg,
 	snd_config_t *n;
 	struct tplg_elem *elem = private;
 	struct snd_soc_tplg_pcm *pcm;
+	struct snd_soc_tplg_be_dai *be_dai;
 	unsigned int *playback, *capture;
 	struct snd_soc_tplg_stream_caps *caps;
 	const char *id, *value;
@@ -282,6 +283,14 @@ static int tplg_parse_streams(snd_tplg_t *tplg, snd_config_t *cfg,
 		capture = &pcm->capture;
 		caps = pcm->caps;
 		break;
+
+	case SND_TPLG_TYPE_BE_DAI:
+		be_dai = elem->be_dai;
+		playback = &be_dai->playback;
+		capture = &be_dai->capture;
+		caps = be_dai->caps;
+		break;
+
 	default:
 		return -EINVAL;
 	}
@@ -429,6 +438,123 @@ int tplg_parse_pcm(snd_tplg_t *tplg,
 				tplg_parse_fe_dai, elem);
 			if (err < 0)
 				return err;
+			continue;
+		}
+	}
+
+	return 0;
+}
+
+static int get_be_dai_flag(snd_config_t *n,
+	struct snd_soc_tplg_be_dai *be_dai, unsigned int mask)
+{
+	const char *val = NULL;
+
+	if (snd_config_get_string(n, &val) < 0)
+		return -EINVAL;
+
+	be_dai->flag_mask |= mask;
+	if (strcmp(val, "true") == 0)
+		be_dai->flags |= mask;
+	else
+		be_dai->flags &= ~mask;
+
+	return 0;
+}
+
+/* Parse back end DAI */
+int tplg_parse_be_dai(snd_tplg_t *tplg,
+	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
+{
+	struct snd_soc_tplg_be_dai *be_dai;
+	struct tplg_elem *elem;
+	snd_config_iterator_t i, next;
+	snd_config_t *n;
+	const char *id, *val = NULL;
+	int err;
+
+	elem = tplg_elem_new_common(tplg, cfg, NULL, SND_TPLG_TYPE_BE_DAI);
+	if (!elem)
+		return -ENOMEM;
+
+	be_dai = elem->be_dai;
+	be_dai->size = elem->size;
+	elem_copy_text(be_dai->dai_name, elem->id,
+		SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+
+	tplg_dbg(" BE DAI: %s\n", elem->id);
+
+	snd_config_for_each(i, next, cfg) {
+
+		n = snd_config_iterator_entry(i);
+		if (snd_config_get_id(n, &id) < 0)
+			continue;
+
+		/* skip comments */
+		if (strcmp(id, "comment") == 0)
+			continue;
+		if (id[0] == '#')
+			continue;
+
+		if (strcmp(id, "index") == 0) {
+			if (snd_config_get_string(n, &val) < 0)
+				return -EINVAL;
+
+			elem->index = atoi(val);
+			tplg_dbg("\t%s: %d\n", id, elem->index);
+			continue;
+		}
+
+		if (strcmp(id, "id") == 0) {
+			if (snd_config_get_string(n, &val) < 0)
+				return -EINVAL;
+
+			be_dai->dai_id = atoi(val);
+			tplg_dbg("\t%s: %d\n", id, be_dai->dai_id);
+			continue;
+		}
+
+		/* stream capabilities */
+		if (strcmp(id, "pcm") == 0) {
+			err = tplg_parse_compound(tplg, n,
+				tplg_parse_streams, elem);
+			if (err < 0)
+				return err;
+			continue;
+		}
+
+		/* flags */
+		if (strcmp(id, "symmetric_rates") == 0) {
+			err = get_be_dai_flag(n, be_dai,
+				SND_SOC_TPLG_DAI_FLGBIT_SYMMETRIC_RATES);
+			if (err < 0)
+				return err;
+			continue;
+		}
+
+		if (strcmp(id, "symmetric_channels") == 0) {
+			err = get_be_dai_flag(n, be_dai,
+				SND_SOC_TPLG_DAI_FLGBIT_SYMMETRIC_CHANNELS);
+			if (err < 0)
+				return err;
+			continue;
+		}
+
+		if (strcmp(id, "symmetric_sample_bits") == 0) {
+			err = get_be_dai_flag(n, be_dai,
+				SND_SOC_TPLG_DAI_FLGBIT_SYMMETRIC_SAMPLEBITS);
+			if (err < 0)
+				return err;
+			continue;
+		}
+
+		/* private data */
+		if (strcmp(id, "data") == 0) {
+			if (snd_config_get_string(n, &val) < 0)
+				return -EINVAL;
+
+			tplg_ref_add(elem, SND_TPLG_TYPE_DATA, val);
+			tplg_dbg("\t%s: %s\n", id, val);
 			continue;
 		}
 	}
