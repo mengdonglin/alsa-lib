@@ -558,6 +558,29 @@ extern "C" {
  * }
  * </pre>
  *
+ * This section type should be used for Back End DAIs <br>
+ *
+ * <pre>
+ * SectionBEDAI."name" {
+ *
+ *	index "1"			# Index number
+ *
+ *	id "0"				# used for binding to the Backend DAI
+ *
+ *	pcm."playback" {
+ *		capabilities "capabilities1"	# capabilities for playback
+ *	}
+ *
+ *	pcm."capture" {
+ *		capabilities "capabilities2"	# capabilities for capture
+ *	}
+ *
+ *	symmetric_rates "true"
+ *	symmetric_channels "true"
+ *	symmetric_sample_bits "false"
+ * }
+ * </pre>
+ *
  */
 
 /** Maximum number of channels supported in one control */
