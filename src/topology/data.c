@@ -827,39 +827,29 @@ int tplg_copy_data(struct tplg_elem *elem, struct tplg_elem *ref)
 		return -EINVAL;
 
 	tplg_dbg("Data '%s' used by '%s'\n", ref->id, elem->id);
+	if (!ref->data || !ref->data->size) /* overlook empty private data */
+		return 0;
+
 	priv_data_size = ref->data->size;
+	elem->obj = realloc(elem->obj,
+			elem->size + priv_data_size);
+	if (!elem->obj)
+		return -ENOMEM;
 
 	switch (elem->type) {
 	case SND_TPLG_TYPE_MIXER:
-		elem->mixer_ctrl = realloc(elem->mixer_ctrl,
-			elem->size + priv_data_size);
-		if (!elem->mixer_ctrl)
-			return -ENOMEM;
 		priv = &elem->mixer_ctrl->priv;
 		break;
 
 	case SND_TPLG_TYPE_ENUM:
-		elem->enum_ctrl = realloc(elem->enum_ctrl,
-			elem->size + priv_data_size);
-		if (!elem->enum_ctrl)
-			return -ENOMEM;
 		priv = &elem->enum_ctrl->priv;
 		break;
 
 	case SND_TPLG_TYPE_BYTES:
-		elem->bytes_ext = realloc(elem->bytes_ext,
-			elem->size + priv_data_size);
-		if (!elem->bytes_ext)
-			return -ENOMEM;
 		priv = &elem->bytes_ext->priv;
 		break;
 
-
 	case SND_TPLG_TYPE_DAPM_WIDGET:
-		elem->widget = realloc(elem->widget,
-			elem->size + priv_data_size);
-		if (!elem->widget)
-			return -ENOMEM;
 		priv = &elem->widget->priv;
 		break;
 
