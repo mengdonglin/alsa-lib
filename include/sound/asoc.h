@@ -121,6 +121,9 @@
 #define SND_SOC_TPLG_DAI_FLGBIT_SYMMETRIC_CHANNELS      (1 << 1)
 #define SND_SOC_TPLG_DAI_FLGBIT_SYMMETRIC_SAMPLEBITS    (1 << 2)
 
+/* maximum number of codecs for a BE/CC link */
+#define SND_SOC_TPLG_LINK_CODECS_MAX    4
+
 /*
  * Block Header.
  * This header precedes all object and object arrays below.
@@ -437,6 +440,15 @@ struct snd_soc_tplg_pcm {
 
 
 /*
+ * Component for backend links.
+ */
+struct snd_soc_tplg_link_cmpnt {
+	char name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN]; /* component name, optional */
+	char dai_name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN];
+} __attribute__((packed));
+
+
+/*
  * Describes the BE or CC link runtime supported configs or params
  *
  * File block representation for BE/CC link config :-
@@ -448,9 +460,16 @@ struct snd_soc_tplg_pcm {
  */
 struct snd_soc_tplg_link_config {
 	__le32 size;            /* in bytes of this structure */
-	__le32 id;              /* unique ID - used to match */
+	__le32 id;              /* unique ID - used to match with DAI link */
 	struct snd_soc_tplg_stream stream[SND_SOC_TPLG_STREAM_CONFIG_MAX]; /* supported configs playback and captrure */
 	__le32 num_streams;     /* number of streams */
+
+	char name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN];        /* link name */
+	char stream_name[SNDRV_CTL_ELEM_ID_NAME_MAXLEN]; /* stream name */
+
+	struct snd_soc_tplg_link_cmpnt cpu;              /* cpu component */
+	struct snd_soc_tplg_link_cmpnt codecs[SND_SOC_TPLG_LINK_CODECS_MAX]; /* codec components */
+	__le32 num_codecs;      /* number of codecs */
 } __attribute__((packed));
 
 /*
