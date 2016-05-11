@@ -830,6 +830,56 @@ static void tplg_add_stream_caps(struct snd_soc_tplg_stream_caps *caps,
 	caps->sig_bits = caps_tpl->sig_bits;
 }
 
+static void set_link_component(struct snd_soc_tplg_link_cmpnt *cmpnt,
+				struct snd_tplg_link_cmpnt_template *cmpnt_tpl)
+{
+	cmpnt->size = sizeof(*cmpnt);
+	elem_copy_text(cmpnt->name, cmpnt_tpl->name,
+		SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+	elem_copy_text(cmpnt->dai_name, cmpnt_tpl->dai_name,
+		SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+}
+
+static int set_link_hw_config(struct snd_soc_tplg_hw_config *cfg,
+				struct snd_tplg_hw_config_template *tpl)
+{
+	int i;
+
+	cfg->size = sizeof(*cfg);
+	cfg->id = tpl->id;
+
+	cfg->fmt = tpl->fmt;
+	cfg->clock_gated = tpl->clock_gated;
+	cfg->invert_bclk = tpl->invert_bclk;
+	cfg->invert_fsync = tpl->invert_fsync;
+	cfg->bclk_master = tpl->bclk_master;
+	cfg->fsync_master = tpl->fsync_master;
+	cfg->mclk_direction = tpl->mclk_direction;
+	cfg->reserved = tpl->reserved;
+	cfg->mclk_rate = tpl->mclk_rate;
+	cfg->bclk_rate = tpl->bclk_rate;
+	cfg->fsync_rate = tpl->fsync_rate;
+
+	cfg->tdm_slots = tpl->tdm_slots;
+	cfg->tdm_slot_width = tpl->tdm_slot_width;
+	cfg->tx_slots = tpl->tx_slots;
+	cfg->rx_slots = tpl->rx_slots;
+
+	if (cfg->tx_channels > SND_SOC_TPLG_MAX_CHAN
+		|| cfg->rx_channels > SND_SOC_TPLG_MAX_CHAN)
+		return -EINVAL;
+
+	cfg->tx_channels = tpl->tx_channels;
+	for (i = 0; i < cfg->tx_channels; i++)
+		cfg->tx_chanmap[i] = tpl->tx_chanmap[i];
+
+	cfg->rx_channels = tpl->rx_channels;
+	for (i = 0; i < cfg->rx_channels; i++)
+		cfg->rx_chanmap[i] = tpl->rx_chanmap[i];
+
+	return 0;
+}
+
 int tplg_add_pcm_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 {
 	struct snd_tplg_pcm_template *pcm_tpl = t->pcm;
@@ -899,8 +949,8 @@ int tplg_add_pcm_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 
 int tplg_add_link_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 {
-	struct snd_tplg_link_template *link = t->link;
-	struct snd_soc_tplg_link_config *lk;
+	struct snd_tplg_link_template *link_tpl = t->link;
+	struct snd_soc_tplg_link_config *link, *_link;
 	struct tplg_elem *elem;
 	int i;
 
@@ -908,22 +958,69 @@ int tplg_add_link_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 		return -EINVAL;
 
 	/* here type can be either BE or CC. */
-	elem = tplg_elem_new_common(tplg, NULL, link->name, t->type);
+	elem = tplg_elem_new_common(tplg, NULL, link_tpl->name, t->type);
 	if (!elem)
 		return -ENOMEM;
 
 	if (t->type == SND_TPLG_TYPE_BE)
-		tplg_dbg("BE Link: %s", link->name);
+		tplg_dbg("BE Link: %s", link_tpl->name);
 	else
-		tplg_dbg("CC Link: %s", link->name);
+		tplg_dbg("CC Link: %s", link_tpl->name);
 
-	lk = elem->link;
-	lk->size = elem->size;
-	lk->id = link->id;
-	lk->num_streams = link->num_streams;
+	link = elem->link;
+	link->size = elem->size;
 
+	/* ID and names */
+	link->id = link_tpl->id;
+	elem_copy_text(link->name, link_tpl->name,
+		SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+	elem_copy_text(link->stream_name, link_tpl->stream_name,
+		SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+
+	/* link components */
+	set_link_component(&link->cpu, link_tpl->cpu);
+	if (link_tpl->num_codecs > SND_SOC_TPLG_LINK_CODECS_MAX)
+		return -EINVAL;
+	link->num_codecs = link_tpl->num_codecs;
+	for (i = 0; i < link->num_codecs; i++)
+		set_link_component(&link->codecs[i], &link_tpl->codecs[i]);
+
+	/* stream configs */
+	if (link_tpl->num_streams > SND_SOC_TPLG_STREAM_CONFIG_MAX)
+		return -EINVAL;
+	link->num_streams = link_tpl->num_streams;
 	for (i = 0; i < link->num_streams; i++)
-		tplg_add_stream_object(&lk->stream[i], &link->stream[i]);
+		tplg_add_stream_object(&link->stream[i], &link_tpl->stream[i]);
+
+	/* HW configs */
+	if (link_tpl->num_hw_configs > SND_SOC_TPLG_HW_CONFIG_MAX)
+		return -EINVAL;
+	link->num_hw_configs = link_tpl->num_hw_configs;
+	link->default_hw_config_id = link_tpl->default_hw_config_id;
+	for (i = 0; i < link->num_hw_configs; i++)
+		set_link_hw_config(&link->hw_config[i], &link_tpl->hw_config[i]);
+
+	/* flags */
+	link->flag_mask = link_tpl->flag_mask;
+	link->flags = link_tpl->flags;
+
+	/* private data */
+	if (link_tpl->priv != NULL && link_tpl->priv->size) {
+		_link = realloc(link,
+			elem->size + link_tpl->priv->size);
+		if (!_link) {
+			tplg_elem_free(elem);
+			return -ENOMEM;
+		}
+
+		link = _link;
+		elem->link = link;
+		elem->size += link_tpl->priv->size;
+
+		memcpy(link->priv.data, link_tpl->priv->data,
+			link_tpl->priv->size);
+		link->priv.size = link_tpl->priv->size;
+	}
 
 	return 0;
 }
