@@ -823,6 +823,9 @@ struct snd_tplg_pcm_template {
 	struct snd_tplg_stream_caps_template *caps[2]; /*!< playback & capture for DAI */
 	int num_streams;	/*!< number of supported configs */
 	struct snd_tplg_stream_template stream[0]; /*!< supported configs */
+	unsigned int flag_mask; /*!< bitmask of flags to configure */
+	unsigned int flags;	/*!< flag value */
+	struct snd_soc_tplg_private *priv;	/*!< private data */
 };
 
 /** \struct snd_tplg_be_dai_template
