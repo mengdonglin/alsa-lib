@@ -179,6 +179,49 @@ static int get_hex_num(const char *str)
 	return values;
 }
 
+/* get uuid from a string */
+static int get_uuid(const char *str, unsigned char *uuid_le)
+{
+	unsigned long int  val;
+	char *tmp, *s = NULL;
+	int values = 0, ret = 0;
+
+	tmp = strdup(str);
+	if (tmp == NULL)
+		return -ENOMEM;
+
+	s = strtok(tmp, ",");
+
+	while (s != NULL) {
+		errno = 0;
+		val = strtoul(s, NULL, 0);
+		if ((errno == ERANGE && (val == LONG_MAX || val == LONG_MIN))
+			|| (errno != 0 && val == 0)
+			|| (val > UCHAR_MAX)) {
+			SNDERR("error: invalid value for uuid\n");
+			ret = -EINVAL;
+			goto out;
+	        }
+
+		 *(uuid_le + values) = (unsigned char)val;
+
+		values ++;
+		if (values >= 16)
+			break;
+
+		s = strtok(NULL, ",");
+	}
+
+	if (values < 16) {
+		SNDERR("error: less than 16 integers for uuid\n");
+		ret = -EINVAL;
+	}
+
+out:
+	free(tmp);
+	return ret;
+}
+
 static int write_hex(char *buf, char *str, int width)
 {
 	long val;
@@ -539,14 +582,8 @@ static int parse_tuple_set(snd_tplg_t *tplg, snd_config_t *cfg,
 
 		switch (type) {
 		case SND_SOC_TPLG_TUPLE_TYPE_UUID:
-			len = strlen(value);
-			if (len > 16 || len == 0) {
-				SNDERR("error: tuple %s: invalid uuid\n", id);
+			if(get_uuid(value, tuple->uuid) < 0)
 				goto err;
-			}
-
-			memcpy(tuple->uuid, value, len);
-			tplg_dbg("\t\t%s = %s\n", tuple->token, tuple->uuid);
 			break;
 
 		case SND_SOC_TPLG_TUPLE_TYPE_STRING:

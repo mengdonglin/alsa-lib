@@ -173,7 +173,7 @@ struct snd_soc_tplg_hdr {
 /* vendor tuple for uuid */
 struct snd_soc_tplg_vendor_uuid_elem {
 	__le32 token;
-	char uuid[16];
+	unsigned char uuid[16];
 } __attribute__((packed));
 
 /* vendor tuple for a bool/byte/short/word value */
