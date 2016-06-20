@@ -757,6 +757,7 @@ static void tplg_add_stream_caps(struct snd_soc_tplg_stream_caps *caps,
 	caps->period_size_max = caps_tpl->period_size_max;
 	caps->buffer_size_min = caps_tpl->buffer_size_min;
 	caps->buffer_size_max = caps_tpl->buffer_size_max;
+	caps->sig_bits = caps_tpl->sig_bits;
 }
 
 static void set_link_component(struct snd_soc_tplg_link_cmpnt *cmpnt,
