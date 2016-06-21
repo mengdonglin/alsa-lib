@@ -847,6 +847,9 @@ int tplg_add_pcm_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 	pcm->trigger[0] = pcm_tpl->trigger[0];
 	pcm->trigger[1] = pcm_tpl->trigger[1];
 
+	pcm->flag_mask = pcm_tpl->flag_mask;
+	pcm->flags = pcm_tpl->flags;
+
 	pcm->num_streams = pcm_tpl->num_streams;
 	for (i = 0; i < pcm_tpl->num_streams; i++)
 		tplg_add_stream_object(&pcm->stream[i], &pcm_tpl->stream[i]);
