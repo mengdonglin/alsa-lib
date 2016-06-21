@@ -822,11 +822,12 @@ struct snd_tplg_pcm_template {
 	unsigned int capture;	/*!< supports capture mode */
 	unsigned int compress;	/*!< 1 = compressed; 0 = PCM */
 	struct snd_tplg_stream_caps_template *caps[2]; /*!< playback & capture for DAI */
-	int num_streams;	/*!< number of supported configs */
-	struct snd_tplg_stream_template stream[0]; /*!< supported configs */
+	unsigned trigger[2]; /* SND_SOC_DPCM_TRIGGER_ trigger flag for playback & capture */
 	unsigned int flag_mask; /*!< bitmask of flags to configure */
 	unsigned int flags;	/*!< flag value */
 	struct snd_soc_tplg_private *priv;	/*!< private data */
+	int num_streams;	/*!< number of supported configs */
+	struct snd_tplg_stream_template stream[0]; /*!< supported configs */
 };
 
 /** \struct snd_tplg_be_dai_template
