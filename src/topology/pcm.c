@@ -380,6 +380,26 @@ static int tplg_parse_streams(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 			tplg_dbg("\t\t%s\n\t\t\t%s\n", id, value);
 			continue;
 		}
+
+		/* DPCM trigger for front end */
+		if (strcmp(id, "trigger") == 0 && elem->type == SND_TPLG_TYPE_PCM) {
+			printf("parse pcm trigger\n");
+			if (snd_config_get_string(n, &value) < 0)
+				continue;
+			if (strcmp(value, "pre") == 0)
+				pcm->trigger[stream] = SND_SOC_DPCM_TRIGGER_PRE;
+			else if (strcmp(value, "post") == 0)
+				pcm->trigger[stream] = SND_SOC_DPCM_TRIGGER_POST;
+			else if (strcmp(value, "bespoke") == 0)
+				pcm->trigger[stream] = SND_SOC_DPCM_TRIGGER_BESPOKE;
+			else {
+				SNDERR("error: invalid FE DPCM trigger ordering '%s'\n", value);
+				return -EINVAL;
+			}
+
+			tplg_dbg("\t\t%s: %s\n", id, value);
+			continue;
+		}
 	}
 
 	return 0;
@@ -791,6 +811,9 @@ int tplg_add_pcm_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 		if (pcm_tpl->caps[i])
 			tplg_add_stream_caps(&pcm->caps[i], pcm_tpl->caps[i]);
 	}
+
+	pcm->trigger[0] = pcm_tpl->trigger[0];
+	pcm->trigger[1] = pcm_tpl->trigger[1];
 
 	pcm->num_streams = pcm_tpl->num_streams;
 	for (i = 0; i < pcm_tpl->num_streams; i++)
