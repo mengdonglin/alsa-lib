@@ -609,6 +609,33 @@ extern "C" {
  * }
  * </pre>
  *
+ * <h4>Back End DAI</h4>
+ * A BE (Back End) DAI is defined as a new section that can include a
+ * unique ID, playback and capture stream capabilities and optional flags.
+ * <br> Its PCM stream capablities are same as those for PCM objects,
+ * please refer to section 'PCM Capabilities'.
+ *
+ * <pre>
+ * SectionBEDAI."name" {
+ *
+ *	index "1"			# Index number
+ *
+ *	id "0"				# used for binding to the Backend DAI
+ *
+ *	pcm."playback" {
+ *		capabilities "capabilities1"	# capabilities for playback
+ *	}
+ *
+ *	pcm."capture" {
+ *		capabilities "capabilities2"	# capabilities for capture
+ *	}
+ *
+ *	symmetric_rates "true"			# optional flags
+ *	symmetric_channels "true"
+ *	symmetric_sample_bits "false"
+ * }
+ * </pre>
+ *
  * <h4>Manifest Private Data</h4>
  * Manfiest may have private data. Users need to define a manifest section
  * and add the references to 1 or multiple data sections. Please refer to
@@ -644,6 +671,7 @@ enum snd_tplg_type {
 	SND_TPLG_TYPE_PCM,		/*!< PCM stream device */
 	SND_TPLG_TYPE_DAPM_WIDGET,	/*!< DAPM widget */
 	SND_TPLG_TYPE_DAPM_GRAPH,	/*!< DAPM graph elements */
+	SND_TPLG_TYPE_BE_DAI,
 	SND_TPLG_TYPE_BE,		/*!< BE DAI link */
 	SND_TPLG_TYPE_CC,		/*!< Hostless codec <-> codec link */
 	SND_TPLG_TYPE_MANIFEST,		/*!< Topology manifest */

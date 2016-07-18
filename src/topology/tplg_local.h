@@ -64,6 +64,7 @@ struct snd_tplg {
 	struct list_head tlv_list;
 	struct list_head widget_list;
 	struct list_head pcm_list;
+	struct list_head be_dai_list;
 	struct list_head be_list;
 	struct list_head cc_list;
 	struct list_head route_list;
@@ -144,6 +145,7 @@ struct tplg_elem {
 		struct snd_soc_tplg_bytes_control *bytes_ext;
 		struct snd_soc_tplg_dapm_widget *widget;
 		struct snd_soc_tplg_pcm *pcm;
+		struct snd_soc_tplg_be_dai *be_dai;
 		struct snd_soc_tplg_link_config *be;
 		struct snd_soc_tplg_link_config *cc;
 		struct snd_soc_tplg_dapm_graph_elem *route;
@@ -219,6 +221,9 @@ int tplg_parse_stream_caps(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
 
 int tplg_parse_pcm(snd_tplg_t *tplg,
+	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
+
+int tplg_parse_be_dai(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
 
 int tplg_parse_be(snd_tplg_t *tplg,
