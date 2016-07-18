@@ -133,6 +133,14 @@ static int tplg_parse_config(snd_tplg_t *tplg, snd_config_t *cfg)
 			continue;
 		}
 
+		if (strcmp(id, "SectionBEDAI") == 0) {
+			err = tplg_parse_compound(tplg, n,
+				tplg_parse_be_dai, NULL);
+			if (err < 0)
+				return err;
+			continue;
+		}
+
 		if (strcmp(id, "SectionBE") == 0) {
 			err = tplg_parse_compound(tplg, n, tplg_parse_be,
 				NULL);
@@ -440,6 +448,7 @@ snd_tplg_t *snd_tplg_new(void)
 	INIT_LIST_HEAD(&tplg->tlv_list);
 	INIT_LIST_HEAD(&tplg->widget_list);
 	INIT_LIST_HEAD(&tplg->pcm_list);
+	INIT_LIST_HEAD(&tplg->be_dai_list);
 	INIT_LIST_HEAD(&tplg->be_list);
 	INIT_LIST_HEAD(&tplg->cc_list);
 	INIT_LIST_HEAD(&tplg->route_list);
@@ -465,6 +474,7 @@ void snd_tplg_free(snd_tplg_t *tplg)
 	tplg_elem_free_list(&tplg->tlv_list);
 	tplg_elem_free_list(&tplg->widget_list);
 	tplg_elem_free_list(&tplg->pcm_list);
+	tplg_elem_free_list(&tplg->be_dai_list);
 	tplg_elem_free_list(&tplg->be_list);
 	tplg_elem_free_list(&tplg->cc_list);
 	tplg_elem_free_list(&tplg->route_list);
