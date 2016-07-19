@@ -451,6 +451,7 @@ struct snd_soc_tplg_pcm {
 	__le32 trigger[2]; /* SND_SOC_DPCM_TRIGGER_ trigger flag for playback & capture */
 	__le32 flag_mask;       /* bitmask of flags to configure, reserved */
 	__le32 flags;           /* flags, reserved */
+	struct snd_soc_tplg_private priv;
 } __attribute__((packed));
 
 
