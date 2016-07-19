@@ -678,6 +678,7 @@ enum snd_tplg_type {
 	SND_TPLG_TYPE_TOKEN,		/*!< Vendor tokens */
 	SND_TPLG_TYPE_TUPLE,		/*!< Vendor tuples */
 	SND_TPLG_TYPE_COMPONENT, /*!< Link component */
+	SND_TPLG_TYPE_HW_CONFIG, /*!< Link HW config */
 };
 
 /**

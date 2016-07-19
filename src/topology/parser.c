@@ -149,6 +149,14 @@ static int tplg_parse_config(snd_tplg_t *tplg, snd_config_t *cfg)
 			continue;
 		}
 
+		if (strcmp(id, "SectionHWConfig") == 0) {
+			err = tplg_parse_compound(tplg, n, tplg_parse_hw_config,
+				NULL);
+			if (err < 0)
+				return err;
+			continue;
+		}
+
 		if (strcmp(id, "SectionBE") == 0) {
 			err = tplg_parse_compound(tplg, n, tplg_parse_be,
 				NULL);
@@ -477,6 +485,7 @@ snd_tplg_t *snd_tplg_new(void)
 	INIT_LIST_HEAD(&tplg->token_list);
 	INIT_LIST_HEAD(&tplg->tuple_list);
 	INIT_LIST_HEAD(&tplg->cmpnt_list);
+	INIT_LIST_HEAD(&tplg->hw_cfg_list);
 
 	return tplg;
 }
@@ -504,6 +513,7 @@ void snd_tplg_free(snd_tplg_t *tplg)
 	tplg_elem_free_list(&tplg->token_list);
 	tplg_elem_free_list(&tplg->tuple_list);
 	tplg_elem_free_list(&tplg->cmpnt_list);
+	tplg_elem_free_list(&tplg->hw_cfg_list);
 
 	free(tplg);
 }

@@ -191,7 +191,9 @@ static int build_link(snd_tplg_t *tplg, struct tplg_elem *elem)
 	struct snd_soc_tplg_link_config *link = elem->link;
 	struct tplg_elem *ref_elem = NULL;
 	struct snd_soc_tplg_link_cmpnt  *codec, *cmpnt;
-	int i, err = 0;
+	struct tplg_ref *ref;
+	struct list_head *base, *pos;
+	int i, num_hw_configs = 0, err = 0;
 
 	err = tplg_build_stream_cfg(tplg, link->stream,
 			link->num_streams);
@@ -224,6 +226,37 @@ static int build_link(snd_tplg_t *tplg, struct tplg_elem *elem)
 		}
 
 		build_component(codec, ref_elem->cmpnt);
+	}
+
+	/* hw configs and priv data */
+	base = &elem->ref_list;
+	list_for_each(pos, base) {
+
+		ref = list_entry(pos, struct tplg_ref, list);
+
+		switch (ref->type) {
+		case SND_TPLG_TYPE_HW_CONFIG:
+			ref->elem = tplg_elem_lookup(&tplg->hw_cfg_list,
+						ref->id, SND_TPLG_TYPE_HW_CONFIG);
+			if (!ref->elem) {
+				SNDERR("error: cannot find HW config '%s'"
+				" referenced by link '%s'\n",
+				ref->id, elem->id);
+				return -EINVAL;
+			}
+
+			memcpy(&link->hw_config[num_hw_configs], ref->elem->hw_cfg,
+				sizeof(struct snd_soc_tplg_hw_config));
+			num_hw_configs++;
+			break;
+
+
+		default:
+			break;
+		}
+
+		if (err < 0)
+			return err;
 	}
 
 	/* add link to manifest */
@@ -850,6 +883,53 @@ static int parse_codecs(snd_tplg_t *tplg, snd_config_t *cfg,
 	return 0;
 }
 
+static int parse_hw_config_refs(snd_tplg_t *tplg, snd_config_t *cfg,
+	struct tplg_elem *elem)
+{
+	struct snd_soc_tplg_link_config *link = elem->link;
+	snd_config_type_t  type;
+	snd_config_iterator_t i, next;
+	snd_config_t *n;
+	const char *id, *val = NULL;
+
+	if (snd_config_get_id(cfg, &id) < 0)
+		return -EINVAL;
+	type = snd_config_get_type(cfg);
+
+	/* refer to a single HW config */
+	if (type == SND_CONFIG_TYPE_STRING ) {
+		if (snd_config_get_string(cfg, &val) < 0)
+			return -EINVAL;
+
+		link->num_hw_configs = 1;
+		return tplg_ref_add(elem, SND_TPLG_TYPE_HW_CONFIG, val);
+	}
+
+	if (type != SND_CONFIG_TYPE_COMPOUND) {
+		SNDERR("error: compound type expected for %s", id);
+		return -EINVAL;
+	}
+
+	/* refer to a list of HW configs */
+	snd_config_for_each(i, next, cfg) {
+		const char *val;
+
+		n = snd_config_iterator_entry(i);
+		if (snd_config_get_string(n, &val) < 0)
+			continue;
+
+		if (link->num_hw_configs >= SND_SOC_TPLG_HW_CONFIG_MAX) {
+			SNDERR("error: exceed max hw configs for link %s", id);
+			return -EINVAL;
+		}
+
+		link->num_hw_configs ++;
+		return tplg_ref_add(elem, SND_TPLG_TYPE_HW_CONFIG, val);
+	}
+
+	return 0;
+}
+
 int tplg_parse_be(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
@@ -913,6 +993,21 @@ int tplg_parse_be(snd_tplg_t *tplg,
 				return err;
 			continue;
 		}
+
+		if (strcmp(id, "hw_configs") == 0) {
+			err = parse_hw_config_refs(tplg, n, elem);
+			if (err < 0)
+				return err;
+			continue;
+		}
+
+		if (strcmp(id, "default_hw_conf_id") == 0) {
+			if (snd_config_get_string(n, &val) < 0)
+				return -EINVAL;
+
+			link->default_hw_config_id = atoi(val);
+			continue;
+		}
 	}
 
 	return 0;
@@ -967,6 +1062,109 @@ int tplg_parse_cc(snd_tplg_t *tplg,
 			continue;
 		}
 
+	}
+
+	return 0;
+}
+
+static int get_audio_hw_format(const char *val)
+{
+	if(!strlen(val))
+		return -EINVAL;
+
+	if(!strcmp(val, "I2S"))
+		return SND_SOC_DAI_FORMAT_I2S;
+
+	if(!strcmp(val, "RIGHT_J"))
+		return SND_SOC_DAI_FORMAT_RIGHT_J;
+
+	if(!strcmp(val, "LEFT_J"))
+		return SND_SOC_DAI_FORMAT_LEFT_J;
+
+	if(!strcmp(val, "DSP_A"))
+		return SND_SOC_DAI_FORMAT_DSP_A;
+
+	if(!strcmp(val, "LEFT_B"))
+		return SND_SOC_DAI_FORMAT_DSP_B;
+
+	if(!strcmp(val, "AC97"))
+		return SND_SOC_DAI_FORMAT_AC97;
+
+	if(!strcmp(val, "PDM"))
+		return SND_SOC_DAI_FORMAT_PDM;
+
+	SNDERR("error: invalid audio HW format %s\n", val);
+	return -EINVAL;
+}
+
+int tplg_parse_hw_config(snd_tplg_t *tplg,
+	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
+{
+
+	struct snd_soc_tplg_hw_config *hw_cfg;
+	struct tplg_elem *elem;
+	snd_config_iterator_t i, next;
+	snd_config_t *n;
+	const char *id, *val = NULL;
+	int ret;
+
+	elem = tplg_elem_new_common(tplg, cfg, NULL, SND_TPLG_TYPE_HW_CONFIG);
+	if (!elem)
+		return -ENOMEM;
+
+	hw_cfg = elem->hw_cfg;
+	hw_cfg->size = elem->size;
+
+	tplg_dbg(" Link HW config: %s\n", elem->id);
+
+	snd_config_for_each(i, next, cfg) {
+
+		n = snd_config_iterator_entry(i);
+		if (snd_config_get_id(n, &id) < 0)
+			continue;
+
+		/* skip comments */
+		if (strcmp(id, "comment") == 0)
+			continue;
+		if (id[0] == '#')
+			continue;
+
+		if (strcmp(id, "id") == 0) {
+			if (snd_config_get_string(n, &val) < 0)
+				return -EINVAL;
+
+			hw_cfg->id = atoi(val);
+			tplg_dbg("\t%s: %d\n", id, hw_cfg->id);
+			continue;
+		}
+
+		if (strcmp(id, "format") == 0) {
+			if (snd_config_get_string(n, &val) < 0)
+				return -EINVAL;
+
+			if ((ret = get_audio_hw_format(val)) < 0)
+				return ret;
+			hw_cfg->fmt = ret;
+			continue;
+		}
+
+		if (strcmp(id, "bclk") == 0) {
+			if (snd_config_get_string(n, &val) < 0)
+				return -EINVAL;
+
+			if (!strcmp(val, "master"))
+				hw_cfg->bclk_master = true;
+			continue;
+		}
+
+		if (strcmp(id, "fsync") == 0) {
+			if (snd_config_get_string(n, &val) < 0)
+				return -EINVAL;
+
+			if (!strcmp(val, "master"))
+				hw_cfg->fsync_master = true;
+			continue;
+		}
 	}
 
 	return 0;

@@ -76,6 +76,7 @@ struct snd_tplg {
 	struct list_head pcm_config_list;
 	struct list_head pcm_caps_list;
 	struct list_head cmpnt_list;
+	struct list_head hw_cfg_list;
 
 	/* type-specific control lists */
 	struct list_head mixer_list;
@@ -152,6 +153,7 @@ struct tplg_elem {
 		struct snd_soc_tplg_stream *stream_cfg;
 		struct snd_soc_tplg_stream_caps *stream_caps;
 		struct snd_soc_tplg_link_cmpnt *cmpnt;
+		struct snd_soc_tplg_hw_config *hw_cfg;
 
 		/* these do not map to UAPI structs but are internal only */
 		struct snd_soc_tplg_ctl_tlv *tlv;
@@ -234,6 +236,9 @@ int tplg_parse_cc(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
 
 int tplg_parse_component(snd_tplg_t *tplg,
+	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
+
+int tplg_parse_hw_config(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
 
 int tplg_build_data(snd_tplg_t *tplg);
