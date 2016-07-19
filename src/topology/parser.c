@@ -141,6 +141,14 @@ static int tplg_parse_config(snd_tplg_t *tplg, snd_config_t *cfg)
 			continue;
 		}
 
+		if (strcmp(id, "SectionComponent") == 0) {
+			err = tplg_parse_compound(tplg, n, tplg_parse_component,
+				NULL);
+			if (err < 0)
+				return err;
+			continue;
+		}
+
 		if (strcmp(id, "SectionBE") == 0) {
 			err = tplg_parse_compound(tplg, n, tplg_parse_be,
 				NULL);
@@ -283,11 +291,11 @@ static int tplg_build_integ(snd_tplg_t *tplg)
 	if (err <  0)
 		return err;
 
-	err = tplg_build_link_cfg(tplg, SND_TPLG_TYPE_BE);
+	err = tplg_build_links(tplg, SND_TPLG_TYPE_BE);
 	if (err <  0)
 		return err;
 
-	err = tplg_build_link_cfg(tplg, SND_TPLG_TYPE_CC);
+	err = tplg_build_links(tplg, SND_TPLG_TYPE_CC);
 	if (err <  0)
 		return err;
 
@@ -468,6 +476,7 @@ snd_tplg_t *snd_tplg_new(void)
 	INIT_LIST_HEAD(&tplg->bytes_ext_list);
 	INIT_LIST_HEAD(&tplg->token_list);
 	INIT_LIST_HEAD(&tplg->tuple_list);
+	INIT_LIST_HEAD(&tplg->cmpnt_list);
 
 	return tplg;
 }
@@ -494,6 +503,7 @@ void snd_tplg_free(snd_tplg_t *tplg)
 	tplg_elem_free_list(&tplg->bytes_ext_list);
 	tplg_elem_free_list(&tplg->token_list);
 	tplg_elem_free_list(&tplg->tuple_list);
+	tplg_elem_free_list(&tplg->cmpnt_list);
 
 	free(tplg);
 }

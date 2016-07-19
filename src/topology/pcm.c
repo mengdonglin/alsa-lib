@@ -172,12 +172,71 @@ static int tplg_build_stream_cfg(snd_tplg_t *tplg,
 	return 0;
 }
 
+static void build_component(struct snd_soc_tplg_link_cmpnt  *dest,
+	const struct snd_soc_tplg_link_cmpnt  *src)
+{
+	/* adjust the componet name, which can be empty */
+	if (strlen(src->name))
+		elem_copy_text(dest->name, src->name,
+			SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+	else
+		dest->name[0] = 0;
+
+	elem_copy_text(dest->dai_name, src->dai_name,
+			SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+}
+
+static int build_link(snd_tplg_t *tplg, struct tplg_elem *elem)
+{
+	struct snd_soc_tplg_link_config *link = elem->link;
+	struct tplg_elem *ref_elem = NULL;
+	struct snd_soc_tplg_link_cmpnt  *codec, *cmpnt;
+	int i, err = 0;
+
+	err = tplg_build_stream_cfg(tplg, link->stream,
+			link->num_streams);
+	if (err < 0)
+		return err;
+
+	/* cpu & codec components */
+	if(strlen(link->cpu.dai_name) == 0) {
+		ref_elem = tplg_elem_lookup(&tplg->cmpnt_list,
+						link->cpu.name, SND_TPLG_TYPE_COMPONENT);
+		if (!ref_elem) {
+			SNDERR("error: cpu component '%s' not found\n", link->cpu.name);
+			return -EINVAL;
+		}
+
+		build_component(&link->cpu, ref_elem->cmpnt);
+	}
+
+	for (i = 0; i < link->num_codecs; i++) {
+		codec = &link->codecs[i];
+
+		if (strlen(codec->dai_name))
+			continue;
+
+		ref_elem = tplg_elem_lookup(&tplg->cmpnt_list,
+						codec->name, SND_TPLG_TYPE_COMPONENT);
+		if (!ref_elem) {
+			SNDERR("error: codec component '%s' not found\n", codec->name);
+			return -EINVAL;
+		}
+
+		build_component(codec, ref_elem->cmpnt);
+	}
+
+	/* add link to manifest */
+	tplg->manifest.dai_link_elems++;
+
+	return 0;
+}
+
 /* build BE/CC DAI link configurations */
-int tplg_build_link_cfg(snd_tplg_t *tplg, unsigned int type)
+int tplg_build_links(snd_tplg_t *tplg, unsigned int type)
 {
 	struct list_head *base, *pos;
 	struct tplg_elem *elem;
-	struct snd_soc_tplg_link_config *link;
 	int err = 0;
 
 	switch (type) {
@@ -199,9 +258,7 @@ int tplg_build_link_cfg(snd_tplg_t *tplg, unsigned int type)
 			return -EINVAL;
 		}
 
-		link = elem->link;
-		err = tplg_build_stream_cfg(tplg, link->stream,
-			link->num_streams);
+		err =  build_link(tplg, elem);
 		if (err < 0)
 			return err;
 	}
@@ -690,6 +747,109 @@ int tplg_parse_be_dai(snd_tplg_t *tplg,
 	return 0;
 }
 
+/* parse a link component */
+int tplg_parse_component(snd_tplg_t *tplg,
+	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
+{
+	struct snd_soc_tplg_link_cmpnt *cmpnt;
+	struct tplg_elem *elem;
+	snd_config_iterator_t i, next;
+	snd_config_t *n;
+	const char *id, *val = NULL;
+	int err;
+
+	elem = tplg_elem_new_common(tplg, cfg, NULL, SND_TPLG_TYPE_COMPONENT);
+	if (!elem)
+		return -ENOMEM;
+
+	cmpnt = elem->cmpnt;
+	cmpnt->size = elem->size;
+
+	snd_config_for_each(i, next, cfg) {
+
+		n = snd_config_iterator_entry(i);
+		if (snd_config_get_id(n, &id) < 0)
+			continue;
+
+		/* skip comments */
+		if (strcmp(id, "comment") == 0)
+			continue;
+		if (id[0] == '#')
+			continue;
+
+		if (strcmp(id, "name") == 0) {
+			if (snd_config_get_string(n, &val) < 0)
+				return -EINVAL;
+
+			if (strlen(val)) /* component name can be empty */
+				elem_copy_text(cmpnt->name, val, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+			continue;
+		}
+
+		if (strcmp(id, "dai") == 0) {
+			if (snd_config_get_string(n, &val) < 0
+				|| !strlen(val))
+				return -EINVAL;
+
+			elem_copy_text(cmpnt->dai_name, val, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+			continue;
+		}
+	}
+
+	return 0;
+}
+
+static int parse_codecs(snd_tplg_t *tplg, snd_config_t *cfg,
+	struct tplg_elem *elem)
+{
+	struct snd_soc_tplg_link_config *link = elem->link;
+	snd_config_type_t  type;
+	snd_config_iterator_t i, next;
+	snd_config_t *n;
+	const char *id, *val = NULL;
+
+	if (snd_config_get_id(cfg, &id) < 0)
+		return -EINVAL;
+	type = snd_config_get_type(cfg);
+
+	/* refer to a single codec */
+	if (type == SND_CONFIG_TYPE_STRING ) {
+		if (snd_config_get_string(cfg, &val) < 0)
+				return -EINVAL;
+
+		tplg_dbg("\tcodec: %s\n", val);
+		elem_copy_text(link->codecs[0].name, val, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+		link->num_codecs = 1;
+		return 0;
+	}
+
+	if (type != SND_CONFIG_TYPE_COMPOUND) {
+		SNDERR("error: compound type expected for %s", id);
+		return -EINVAL;
+	}
+
+	/* refer to a list of codecs */
+	snd_config_for_each(i, next, cfg) {
+		const char *val;
+
+		n = snd_config_iterator_entry(i);
+		if (snd_config_get_string(n, &val) < 0)
+			continue;
+
+		tplg_dbg("\tcodec: %s\n", val);
+		if (link->num_codecs >= SND_SOC_TPLG_LINK_CODECS_MAX) {
+			SNDERR("error: exceed max number of codecs for link %s", id);
+			return -EINVAL;
+		}
+
+		elem_copy_text(link->codecs[link->num_codecs].name, val,
+			SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+		link->num_codecs ++;
+	}
+
+	return 0;
+}
+
 int tplg_parse_be(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
@@ -698,6 +858,7 @@ int tplg_parse_be(snd_tplg_t *tplg,
 	snd_config_iterator_t i, next;
 	snd_config_t *n;
 	const char *id, *val = NULL;
+	int err;
 
 	elem = tplg_elem_new_common(tplg, cfg, NULL, SND_TPLG_TYPE_BE);
 	if (!elem)
@@ -735,6 +896,21 @@ int tplg_parse_be(snd_tplg_t *tplg,
 
 			link->id = atoi(val);
 			tplg_dbg("\t%s: %d\n", id, link->id);
+			continue;
+		}
+
+		if (strcmp(id, "cpu") == 0) {
+			if (snd_config_get_string(n, &val) < 0)
+				return -EINVAL;
+
+			elem_copy_text(link->cpu.name, val, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+			continue;
+		}
+
+		if (strcmp(id, "codecs") == 0) {
+			err = parse_codecs(tplg, n, elem);
+			if (err < 0)
+				return err;
 			continue;
 		}
 	}

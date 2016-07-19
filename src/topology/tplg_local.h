@@ -75,6 +75,7 @@ struct snd_tplg {
 	struct list_head manifest_list;
 	struct list_head pcm_config_list;
 	struct list_head pcm_caps_list;
+	struct list_head cmpnt_list;
 
 	/* type-specific control lists */
 	struct list_head mixer_list;
@@ -150,6 +151,7 @@ struct tplg_elem {
 		struct snd_soc_tplg_dapm_graph_elem *route;
 		struct snd_soc_tplg_stream *stream_cfg;
 		struct snd_soc_tplg_stream_caps *stream_caps;
+		struct snd_soc_tplg_link_cmpnt *cmpnt;
 
 		/* these do not map to UAPI structs but are internal only */
 		struct snd_soc_tplg_ctl_tlv *tlv;
@@ -231,6 +233,9 @@ int tplg_parse_be(snd_tplg_t *tplg,
 int tplg_parse_cc(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
 
+int tplg_parse_component(snd_tplg_t *tplg,
+	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED);
+
 int tplg_build_data(snd_tplg_t *tplg);
 int tplg_build_manifest_data(snd_tplg_t *tplg);
 int tplg_build_controls(snd_tplg_t *tplg);
@@ -290,7 +295,7 @@ int tplg_add_bytes(snd_tplg_t *tplg, struct snd_tplg_bytes_template *bytes_ctl,
 
 int tplg_build_pcm(snd_tplg_t *tplg, unsigned int type);
 int tplg_build_be_dais(snd_tplg_t *tplg, unsigned int type);
-int tplg_build_link_cfg(snd_tplg_t *tplg, unsigned int type);
+int tplg_build_links(snd_tplg_t *tplg, unsigned int type);
 int tplg_add_link_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t);
 int tplg_add_pcm_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t);
 int tplg_add_be_dai_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t);
