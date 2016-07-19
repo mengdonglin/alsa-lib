@@ -565,6 +565,13 @@ int tplg_parse_pcm(snd_tplg_t *tplg,
 				return err;
 			continue;
 		}
+
+		if (strcmp(id, "data") == 0) {
+			err = tplg_parse_data_refs(n, elem);
+			if (err < 0)
+				return err;
+			continue;
+		}
 	}
 
 	return 0;
@@ -830,7 +837,7 @@ static void tplg_add_stream_caps(struct snd_soc_tplg_stream_caps *caps,
 int tplg_add_pcm_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 {
 	struct snd_tplg_pcm_template *pcm_tpl = t->pcm;
-	struct snd_soc_tplg_pcm *pcm;
+	struct snd_soc_tplg_pcm *pcm, *_pcm;
 	struct tplg_elem *elem;
 	int i;
 
@@ -871,6 +878,25 @@ int tplg_add_pcm_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 	pcm->num_streams = pcm_tpl->num_streams;
 	for (i = 0; i < pcm_tpl->num_streams; i++)
 		tplg_add_stream_object(&pcm->stream[i], &pcm_tpl->stream[i]);
+
+	/* private data */
+	if (pcm_tpl->priv != NULL && pcm_tpl->priv->size) {
+		tplg_dbg("\t priv data size %d\n", pcm_tpl->priv->size);
+		_pcm = realloc(pcm,
+			elem->size + pcm_tpl->priv->size);
+		if (!_pcm) {
+			tplg_elem_free(elem);
+			return -ENOMEM;
+		}
+
+		pcm = _pcm;
+		elem->pcm =pcm;
+		elem->size += pcm_tpl->priv->size;
+
+		memcpy(pcm->priv.data, pcm_tpl->priv->data,
+			pcm_tpl->priv->size);
+		pcm->priv.size = pcm_tpl->priv->size;
+	}
 
 	return 0;
 }
