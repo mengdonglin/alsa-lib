@@ -892,6 +892,8 @@ struct snd_tplg_pcm_template {
 	unsigned int compress;	/*!< 1 = compressed; 0 = PCM */
 	struct snd_tplg_stream_caps_template *caps[2]; /*!< playback & capture for DAI */
 	unsigned trigger[2]; /* SND_SOC_DPCM_TRIGGER_ trigger flag for playback & capture */
+	unsigned int flag_mask; /*!< bitmask of flags to configure */
+	unsigned int flags;	/*!< flag value */
 	int num_streams;	/*!< number of supported configs */
 	struct snd_tplg_stream_template stream[0]; /*!< supported configs */
 };
