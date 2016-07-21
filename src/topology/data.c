@@ -1046,6 +1046,7 @@ int tplg_copy_data(snd_tplg_t *tplg, struct tplg_elem *elem,
 		" element '%s'\n", ref->id, elem->id);
 		return -EINVAL;
 	}
+	ref->elem = ref_elem;
 
 	tplg_dbg("Data '%s' used by '%s'\n", ref->id, elem->id);
 	/* overlook empty private data */
