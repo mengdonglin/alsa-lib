@@ -250,6 +250,11 @@ static int build_link(snd_tplg_t *tplg, struct tplg_elem *elem)
 			num_hw_configs++;
 			break;
 
+		case SND_TPLG_TYPE_DATA:
+			err = tplg_copy_data(tplg, elem, ref);
+			if (err < 0)
+				return err;
+			break;
 
 		default:
 			break;
