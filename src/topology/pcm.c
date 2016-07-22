@@ -571,6 +571,36 @@ static int parse_link_flags(snd_tplg_t *tplg, snd_config_t *cfg,
 			_flags |= SND_SOC_TPLG_LNK_FLGBIT_IGNORE_POWERDOWN_TIME;
 			continue;
 		}
+
+		if (strcmp(val, "symmetric_rates") == 0) {
+			_flag_mask |= SND_SOC_TPLG_LNK_FLGBIT_SYMMETRIC_RATES;
+			_flags |= SND_SOC_TPLG_LNK_FLGBIT_SYMMETRIC_RATES;
+			continue;
+		}
+
+		if (strcmp(val, "symmetric_channels") == 0) {
+			_flag_mask |= SND_SOC_TPLG_LNK_FLGBIT_SYMMETRIC_CHANNELS;
+			_flags |= SND_SOC_TPLG_LNK_FLGBIT_SYMMETRIC_CHANNELS;
+			continue;
+		}
+
+		if (strcmp(val, "symmetric_samplebits") == 0) {
+			_flag_mask |= SND_SOC_TPLG_LNK_FLGBIT_SYMMETRIC_SAMPLEBITS;
+			_flags |= SND_SOC_TPLG_LNK_FLGBIT_SYMMETRIC_SAMPLEBITS;
+			continue;
+		}
+
+		if (strcmp(val, "dpcm_playback") == 0) {
+			_flag_mask |= SND_SOC_TPLG_LNK_FLGBIT_DPCM_PLAYBACK;
+			_flags |= SND_SOC_TPLG_LNK_FLGBIT_DPCM_PLAYBACK;
+			continue;
+		}
+
+		if (strcmp(val, "dpcm_capture") == 0) {
+			_flag_mask |= SND_SOC_TPLG_LNK_FLGBIT_DPCM_CAPTURE;
+			_flags |= SND_SOC_TPLG_LNK_FLGBIT_DPCM_CAPTURE;
+			continue;
+		}
 	}
 
 	*flag_mask = _flag_mask;
@@ -946,6 +976,8 @@ int tplg_parse_be(snd_tplg_t *tplg,
 
 	link = elem->link;
 	link->size = elem->size;
+	elem_copy_text(link->name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+	elem_copy_text(link->stream_name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
 
 	tplg_dbg(" BE: %s\n", elem->id);
 
@@ -1006,6 +1038,13 @@ int tplg_parse_be(snd_tplg_t *tplg,
 				return -EINVAL;
 
 			link->default_hw_config_id = atoi(val);
+			continue;
+		}
+
+		if (strcmp(id, "flags") == 0) {
+			err = parse_link_flags(tplg, n, &link->flag_mask, &link->flags);
+			if (err < 0)
+				return err;
 			continue;
 		}
 	}
