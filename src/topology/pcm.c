@@ -946,6 +946,8 @@ int tplg_parse_be(snd_tplg_t *tplg,
 
 	link = elem->link;
 	link->size = elem->size;
+	elem_copy_text(link->name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
+	elem_copy_text(link->stream_name, elem->id, SNDRV_CTL_ELEM_ID_NAME_MAXLEN);
 
 	tplg_dbg(" BE: %s\n", elem->id);
 
