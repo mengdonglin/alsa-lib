@@ -650,6 +650,43 @@ extern "C" {
  *	data "name"			# optional private data
  * }
  * </pre>
+ *
+ * <h4>Include other files</h4>
+ * Users can include a list of files by SectionInclude in the text config
+ * file. This allows user to define common info in separate files (e.g.
+ * vendor tokens, tuples) and share them for different platforms, by
+ * including them. This can save the total size of files. <br><br>
+ * Users can also specifiy a list of subdirectories under
+ * "usr/share/alsa/topology", the installation directory of toplogy
+ * configuration files, to search the included files. <br><br>
+ *
+ * The topology library will search and open an included file in the
+ * following order of priority:
+ *  1. directly open the file by its name;
+ *  2. search for the file name in the directory containing current file;
+ *  3. search for the file name in "usr/share/alsa/topology";
+ *  4. search for the file name in user specified subdirectories under
+ *     "usr/share/alsa/topology".
+ *
+ * The order of the included files need not to be same as their
+ * dependencies, since the tool will load them all before parsing their
+ * dependencies.
+ *
+ * <pre>
+ * SectionInclude."name" {
+ *	path [		# Optional subdirectories to search included files
+ *		"1st subdirectory"
+ *		"2nd subdirectory"
+ *		...
+ *	]
+ *
+ *	include [	# Name of included files
+ *		"name of 1st included file"
+ *		"name of 2nd included file"
+ *		...
+ *	]
+ * }
+ * </pre>
  */
 
 /** Maximum number of channels supported in one control */
