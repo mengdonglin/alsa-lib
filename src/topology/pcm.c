@@ -429,6 +429,49 @@ static int tplg_parse_fe_dai(snd_tplg_t *tplg ATTRIBUTE_UNUSED,
 	return 0;
 }
 
+static int parse_link_flags(snd_tplg_t *tplg, snd_config_t *cfg,
+	unsigned int *flag_mask, unsigned int *flags)
+{
+	snd_config_type_t  type;
+	snd_config_iterator_t i, next;
+	snd_config_t *n;
+	const char *id, *val = NULL;
+	unsigned int _flag_mask = 0, _flags = 0;
+
+	if (snd_config_get_id(cfg, &id) < 0)
+		return -EINVAL;
+
+	type = snd_config_get_type(cfg);
+	if (type != SND_CONFIG_TYPE_COMPOUND) {
+		SNDERR("error: compound type expected for %s", id);
+		return -EINVAL;
+	}
+
+	snd_config_for_each(i, next, cfg) {
+		const char *val;
+
+		n = snd_config_iterator_entry(i);
+		if (snd_config_get_string(n, &val) < 0)
+			continue;
+
+		if (strcmp(val, "ignore_suspend") == 0) {
+			_flag_mask |= SND_SOC_TPLG_LNK_FLGBIT_IGNORE_SUSPEND;
+			_flags |= SND_SOC_TPLG_LNK_FLGBIT_IGNORE_SUSPEND;
+			continue;
+		}
+
+		if (strcmp(val, "ignore_powerdown_time") == 0) {
+			_flag_mask |= SND_SOC_TPLG_LNK_FLGBIT_IGNORE_POWERDOWN_TIME;
+			_flags |= SND_SOC_TPLG_LNK_FLGBIT_IGNORE_POWERDOWN_TIME;
+			continue;
+		}
+	}
+
+	*flag_mask = _flag_mask;
+	*flags = _flags;
+	return 0;
+}
+
 /* Parse pcm (for front end DAI & DAI link) */
 int tplg_parse_pcm(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
@@ -491,6 +534,13 @@ int tplg_parse_pcm(snd_tplg_t *tplg,
 		if (strcmp(id, "dai") == 0) {
 			err = tplg_parse_compound(tplg, n,
 				tplg_parse_fe_dai, elem);
+			if (err < 0)
+				return err;
+			continue;
+		}
+
+		if (strcmp(id, "flags") == 0) {
+			err = parse_link_flags(tplg, n, &pcm->flag_mask, &pcm->flags);
 			if (err < 0)
 				return err;
 			continue;
@@ -791,6 +841,9 @@ int tplg_add_pcm_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 		if (pcm_tpl->caps[i])
 			tplg_add_stream_caps(&pcm->caps[i], pcm_tpl->caps[i]);
 	}
+
+	pcm->flag_mask = pcm_tpl->flag_mask;
+	pcm->flags = pcm_tpl->flags;
 
 	pcm->num_streams = pcm_tpl->num_streams;
 	for (i = 0; i < pcm_tpl->num_streams; i++)
