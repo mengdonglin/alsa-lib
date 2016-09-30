@@ -73,11 +73,31 @@ static int tplg_build_stream_caps(snd_tplg_t *tplg,
 /* build configurations of a PCM (FE DAI & DAI link) element */
 static int build_pcm(snd_tplg_t *tplg, struct tplg_elem *elem)
 {
+	struct tplg_ref *ref;
+	struct list_head *base, *pos;
 	int err;
 
 	err = tplg_build_stream_caps(tplg, elem->id, elem->pcm->caps);
 		if (err < 0)
 			return err;
+
+	/* merge private data from the referenced data elements */
+	base = &elem->ref_list;
+	list_for_each(pos, base) {
+
+		ref = list_entry(pos, struct tplg_ref, list);
+		if (ref->type == SND_TPLG_TYPE_DATA) {
+			err = tplg_copy_data(tplg, elem, ref);
+			if (err < 0)
+				return err;
+		}
+		if (!ref->elem) {
+			SNDERR("error: cannot find '%s' referenced by"
+				" PCM '%s'\n", ref->id, elem->id);
+			return -EINVAL;
+		} else if (err < 0)
+			return err;
+	}
 
 	return 0;
 }
@@ -484,7 +504,7 @@ static int parse_link_flags(snd_tplg_t *tplg, snd_config_t *cfg,
 	return 0;
 }
 
-/* Parse pcm (for front end DAI & DAI link) */
+/* Parse PCM (for front end DAI & DAI link) in text conf file */
 int tplg_parse_pcm(snd_tplg_t *tplg,
 	snd_config_t *cfg, void *private ATTRIBUTE_UNUSED)
 {
@@ -553,6 +573,13 @@ int tplg_parse_pcm(snd_tplg_t *tplg,
 
 		if (strcmp(id, "flags") == 0) {
 			err = parse_link_flags(tplg, n, &pcm->flag_mask, &pcm->flags);
+			if (err < 0)
+				return err;
+			continue;
+		}
+
+		if (strcmp(id, "data") == 0) {
+			err = tplg_parse_data_refs(n, elem);
 			if (err < 0)
 				return err;
 			continue;
@@ -819,10 +846,11 @@ static void tplg_add_stream_caps(struct snd_soc_tplg_stream_caps *caps,
 	caps->sig_bits = caps_tpl->sig_bits;
 }
 
+/* Add a PCM element (FE DAI & DAI link) from C API */
 int tplg_add_pcm_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 {
 	struct snd_tplg_pcm_template *pcm_tpl = t->pcm;
-	struct snd_soc_tplg_pcm *pcm;
+	struct snd_soc_tplg_pcm *pcm, *_pcm;
 	struct tplg_elem *elem;
 	int i;
 
@@ -860,6 +888,25 @@ int tplg_add_pcm_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 	pcm->num_streams = pcm_tpl->num_streams;
 	for (i = 0; i < pcm_tpl->num_streams; i++)
 		tplg_add_stream_object(&pcm->stream[i], &pcm_tpl->stream[i]);
+
+	/* private data */
+	if (pcm_tpl->priv != NULL && pcm_tpl->priv->size) {
+		tplg_dbg("\t priv data size %d\n", pcm_tpl->priv->size);
+		_pcm = realloc(pcm,
+			elem->size + pcm_tpl->priv->size);
+		if (!_pcm) {
+			tplg_elem_free(elem);
+			return -ENOMEM;
+		}
+
+		pcm = _pcm;
+		elem->pcm =pcm;
+		elem->size += pcm_tpl->priv->size;
+
+		memcpy(pcm->priv.data, pcm_tpl->priv->data,
+			pcm_tpl->priv->size);
+		pcm->priv.size = pcm_tpl->priv->size;
+	}
 
 	return 0;
 }
