@@ -159,8 +159,6 @@ static int tplg_build_be_dai(snd_tplg_t *tplg, struct tplg_elem *elem)
 	return 0;
 }
 
-
-
 /* build BE DAIs*/
 int tplg_build_be_dais(snd_tplg_t *tplg, unsigned int type)
 {
@@ -246,6 +244,24 @@ static int build_link(snd_tplg_t *tplg, struct tplg_elem *elem)
 		}
 
 		if (err < 0)
+			return err;
+	}
+
+	/* merge private data from the referenced data elements */
+	base = &elem->ref_list;
+	list_for_each(pos, base) {
+
+		ref = list_entry(pos, struct tplg_ref, list);
+		if (ref->type == SND_TPLG_TYPE_DATA) {
+			err = tplg_copy_data(tplg, elem, ref);
+			if (err < 0)
+				return err;
+		}
+		if (!ref->elem) {
+			SNDERR("error: cannot find '%s' referenced by"
+				" DAI link '%s'\n", ref->id, elem->id);
+			return -EINVAL;
+		} else if (err < 0)
 			return err;
 	}
 
@@ -1232,6 +1248,25 @@ int tplg_add_link_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 	/* flags */
 	link->flag_mask = link_tpl->flag_mask;
 	link->flags = link_tpl->flags;
+
+	/* private data */
+	if (link_tpl->priv != NULL && link_tpl->priv->size) {
+		_link = realloc(link,
+			elem->size + link_tpl->priv->size);
+		if (!_link) {
+			tplg_elem_free(elem);
+			return -ENOMEM;
+		}
+
+		link = _link;
+		elem->link = link;
+		elem->size += link_tpl->priv->size;
+
+		memcpy(link->priv.data, link_tpl->priv->data,
+			link_tpl->priv->size);
+		link->priv.size = link_tpl->priv->size;
+	}
+
 	return 0;
 }
 
