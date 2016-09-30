@@ -513,6 +513,7 @@ struct snd_soc_tplg_link_config {
 	__le32 default_hw_config_id;   /* default hw config ID for init */
 	__le32 flag_mask;       /* bitmask of flags to configure */
 	__le32 flags;           /* SND_SOC_TPLG_LNK_FLGBIT_* flag value */
+	struct snd_soc_tplg_private priv;
 } __attribute__((packed));
 
 /*
