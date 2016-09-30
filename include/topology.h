@@ -947,6 +947,8 @@ struct snd_tplg_hw_config_template {
 struct snd_tplg_link_template {
 	const char *name;	/*!< link name */
 	int id;	/*!< unique ID - used to match with existing BE and CC links */
+	const char *stream_name;        /*!< stream name of the link */
+
 	int num_streams;	/*!< number of configs */
 	struct snd_tplg_stream_template *stream;       /*!< supported configs */
 
