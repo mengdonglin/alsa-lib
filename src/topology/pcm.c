@@ -925,6 +925,47 @@ int tplg_add_pcm_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 	return 0;
 }
 
+/* Set link HW config from C API template */
+static int set_link_hw_config(struct snd_soc_tplg_hw_config *cfg,
+			struct snd_tplg_hw_config_template *tpl)
+{
+	int i;
+
+	cfg->size = sizeof(*cfg);
+	cfg->id = tpl->id;
+
+	cfg->fmt = tpl->fmt;
+	cfg->clock_gated = tpl->clock_gated;
+	cfg->invert_bclk = tpl->invert_bclk;
+	cfg->invert_fsync = tpl->invert_fsync;
+	cfg->bclk_master = tpl->bclk_master;
+	cfg->fsync_master = tpl->fsync_master;
+	cfg->mclk_direction = tpl->mclk_direction;
+	cfg->reserved = tpl->reserved;
+	cfg->mclk_rate = tpl->mclk_rate;
+	cfg->bclk_rate = tpl->bclk_rate;
+	cfg->fsync_rate = tpl->fsync_rate;
+
+	cfg->tdm_slots = tpl->tdm_slots;
+	cfg->tdm_slot_width = tpl->tdm_slot_width;
+	cfg->tx_slots = tpl->tx_slots;
+	cfg->rx_slots = tpl->rx_slots;
+
+	if (cfg->tx_channels > SND_SOC_TPLG_MAX_CHAN
+		|| cfg->rx_channels > SND_SOC_TPLG_MAX_CHAN)
+		return -EINVAL;
+
+	cfg->tx_channels = tpl->tx_channels;
+	for (i = 0; i < cfg->tx_channels; i++)
+		cfg->tx_chanmap[i] = tpl->tx_chanmap[i];
+
+	cfg->rx_channels = tpl->rx_channels;
+	for (i = 0; i < cfg->rx_channels; i++)
+		cfg->rx_chanmap[i] = tpl->rx_chanmap[i];
+
+	return 0;
+}
+
 /* Add a BE/CC DAI link element from C API */
 int tplg_add_link_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 {
@@ -957,6 +998,13 @@ int tplg_add_link_object(snd_tplg_t *tplg, snd_tplg_obj_template_t *t)
 	for (i = 0; i < link->num_streams; i++)
 		tplg_add_stream_object(&link->stream[i], &link_tpl->stream[i]);
 
+	/* HW configs */
+	if (link_tpl->num_hw_configs > SND_SOC_TPLG_HW_CONFIG_MAX)
+		return -EINVAL;
+	link->num_hw_configs = link_tpl->num_hw_configs;
+	link->default_hw_config_id = link_tpl->default_hw_config_id;
+	for (i = 0; i < link->num_hw_configs; i++)
+		set_link_hw_config(&link->hw_config[i], &link_tpl->hw_config[i]);
 	return 0;
 }
 
