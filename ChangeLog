@@ -23,7 +23,7 @@
 * renamed soundlib.h to asoundlib.h
 * renamed libraries from libsound to libasound
 * big API changes
-  - added switches interfaces
+  - added switch interfaces
 * added RawMIDI API
 
 0.0.8 -> 0.0.9
