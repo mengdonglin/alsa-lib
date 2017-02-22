@@ -1,3 +1,5 @@
+this is a test
+
 H add serious PCM test application to test various period/buffer size
   combinations to determine possible problems in the lowlevel drivers
 M think about xrun recovery helpers
